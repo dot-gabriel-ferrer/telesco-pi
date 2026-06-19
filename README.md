@@ -1,6 +1,6 @@
 # Telesco-Pi 🔭
 
-**Plataforma astronómica avanzada, open-source y mobile-first para Raspberry Pi 5.**
+**Plataforma astronómica avanzada y mobile-first para Raspberry Pi 5.**
 
 ---
 
