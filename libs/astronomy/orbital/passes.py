@@ -45,7 +45,8 @@ class PassCalculator:
 
     def _segment_to_pass(self, tle: TLERecord, observer: ObserverLocation, segment: list[tuple[datetime, float, float]]) -> OrbitalPass:
         peak = max(segment, key=lambda item: item[1])
-        track = [TrackPoint(utc=t, alt_deg=alt, az_deg=az) for t, alt, az in segment[:: max(1, int(15 / 10))]]
+        stride = max(1, int(round(15 / 10)))
+        track = [TrackPoint(utc=t, alt_deg=alt, az_deg=az) for t, alt, az in segment[::stride]]
         sun_alt, _ = self.ephemeris.get_sun_altaz(observer, peak[0])
         visibility_class = 'dark' if sun_alt < -18 else 'twilight' if sun_alt < -6 else 'daylight'
         warnings = []
