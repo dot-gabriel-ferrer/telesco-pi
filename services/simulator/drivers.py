@@ -121,6 +121,8 @@ class SimulatedMountDriver(MountDriver):
         if fault is None or fault.mode == "recover":
             self._fault = None
             self._health = DeviceHealth.HEALTHY
+            if self._connection_state in {DeviceConnectionState.ERROR, DeviceConnectionState.DEGRADED}:
+                self._connection_state = DeviceConnectionState.CONNECTED
             self._message = "Mount simulator recovered."
         elif fault.mode == "disconnect":
             self._connection_state = DeviceConnectionState.DEGRADED
