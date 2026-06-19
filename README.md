@@ -6,7 +6,7 @@
 
 ## 📖 Descripción General
 
-Telesco-Pi es una plataforma astronómica local de código abierto (actualmente privada) diseñada para ejecutarse sobre una **Raspberry Pi 5**. Proporciona control completo de una montura **SkyWatcher AZ-Go2 WiFi** y una cámara **Player One Mars M USB 3.0**, todo desde un smartphone en campo, sin conexión a Internet (modo *offline-first*).
+Telesco-Pi es una plataforma astronómica local (actualmente privada) diseñada para ejecutarse sobre una **Raspberry Pi 5**. Proporciona control completo de una montura **SkyWatcher AZ-Go2 WiFi** y una cámara **Player One Mars M USB 3.0**, todo desde un smartphone en campo, sin conexión a Internet (modo *offline-first*).
 
 La interfaz de usuario es una **Progressive Web App (PWA)** optimizada para dispositivos móviles, construida con React + TypeScript. El backend es una API REST/WebSocket robusta en Python con FastAPI.
 
