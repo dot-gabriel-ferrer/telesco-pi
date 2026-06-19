@@ -22,7 +22,8 @@ class OptionalAuthMiddleware(BaseHTTPMiddleware):
         if request.url.path.endswith("/health/live") or request.url.path.endswith("/health/ready"):
             return await call_next(request)
         auth_header = request.headers.get("Authorization", "")
-        if auth_header != f"******":
+        expected = f"Bearer {self.token}" if self.token else ""
+        if auth_header != expected:
             return JSONResponse(
                 status_code=401,
                 content={"error": "Unauthorized", "code": "auth_required", "details": {}},
