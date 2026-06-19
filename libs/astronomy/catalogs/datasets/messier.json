@@ -1,0 +1,222 @@
+[
+  {
+    "id": "M1",
+    "name": "Crab Nebula",
+    "type": "Supernova Remnant",
+    "ra_deg": 83.633,
+    "dec_deg": 22.014,
+    "magnitude": 8.4,
+    "constellation": "Taurus",
+    "angular_size_arcmin": 7.0,
+    "description": "Historic supernova remnant with filamentary structure."
+  },
+  {
+    "id": "M8",
+    "name": "Lagoon Nebula",
+    "type": "Emission Nebula",
+    "ra_deg": 270.925,
+    "dec_deg": -24.385,
+    "magnitude": 6.0,
+    "constellation": "Sagittarius",
+    "angular_size_arcmin": 90.0,
+    "description": "Large emission nebula and open cluster complex."
+  },
+  {
+    "id": "M11",
+    "name": "Wild Duck Cluster",
+    "type": "Open Cluster",
+    "ra_deg": 282.77,
+    "dec_deg": -6.272,
+    "magnitude": 6.3,
+    "constellation": "Scutum",
+    "angular_size_arcmin": 14.0,
+    "description": "Dense open cluster rich in stars."
+  },
+  {
+    "id": "M13",
+    "name": "Hercules Globular Cluster",
+    "type": "Globular Cluster",
+    "ra_deg": 250.421,
+    "dec_deg": 36.459,
+    "magnitude": 5.8,
+    "constellation": "Hercules",
+    "angular_size_arcmin": 20.0,
+    "description": "Bright northern globular cluster well suited to visual observation."
+  },
+  {
+    "id": "M16",
+    "name": "Eagle Nebula",
+    "type": "Emission Nebula",
+    "ra_deg": 274.7,
+    "dec_deg": -13.806,
+    "magnitude": 6.4,
+    "constellation": "Serpens",
+    "angular_size_arcmin": 35.0,
+    "description": "Star-forming region containing the Pillars of Creation."
+  },
+  {
+    "id": "M17",
+    "name": "Omega Nebula",
+    "type": "Emission Nebula",
+    "ra_deg": 275.197,
+    "dec_deg": -16.171,
+    "magnitude": 6.0,
+    "constellation": "Sagittarius",
+    "angular_size_arcmin": 46.0,
+    "description": "Bright emission nebula often called the Swan Nebula."
+  },
+  {
+    "id": "M20",
+    "name": "Trifid Nebula",
+    "type": "Emission/Reflection Nebula",
+    "ra_deg": 270.66,
+    "dec_deg": -23.022,
+    "magnitude": 6.3,
+    "constellation": "Sagittarius",
+    "angular_size_arcmin": 28.0,
+    "description": "Nebula with dark lanes and mixed emission/reflection regions."
+  },
+  {
+    "id": "M27",
+    "name": "Dumbbell Nebula",
+    "type": "Planetary Nebula",
+    "ra_deg": 299.901,
+    "dec_deg": 22.721,
+    "magnitude": 7.5,
+    "constellation": "Vulpecula",
+    "angular_size_arcmin": 8.0,
+    "description": "Bright planetary nebula with prominent bipolar shape."
+  },
+  {
+    "id": "M31",
+    "name": "Andromeda Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 10.685,
+    "dec_deg": 41.269,
+    "magnitude": 3.4,
+    "constellation": "Andromeda",
+    "angular_size_arcmin": 190.0,
+    "description": "Nearest major spiral galaxy and prominent naked-eye object."
+  },
+  {
+    "id": "M33",
+    "name": "Triangulum Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 23.462,
+    "dec_deg": 30.66,
+    "magnitude": 5.7,
+    "constellation": "Triangulum",
+    "angular_size_arcmin": 73.0,
+    "description": "Face-on spiral galaxy with low surface brightness."
+  },
+  {
+    "id": "M42",
+    "name": "Orion Nebula",
+    "type": "Emission Nebula",
+    "ra_deg": 83.822,
+    "dec_deg": -5.391,
+    "magnitude": 4.0,
+    "constellation": "Orion",
+    "angular_size_arcmin": 85.0,
+    "description": "Bright nebula in Orion and benchmark deep-sky target."
+  },
+  {
+    "id": "M44",
+    "name": "Beehive Cluster",
+    "type": "Open Cluster",
+    "ra_deg": 130.1,
+    "dec_deg": 19.667,
+    "magnitude": 3.7,
+    "constellation": "Cancer",
+    "angular_size_arcmin": 95.0,
+    "description": "Large nearby open cluster visible to the unaided eye."
+  },
+  {
+    "id": "M45",
+    "name": "Pleiades",
+    "type": "Open Cluster",
+    "ra_deg": 56.871,
+    "dec_deg": 24.105,
+    "magnitude": 1.6,
+    "constellation": "Taurus",
+    "angular_size_arcmin": 110.0,
+    "description": "Bright nearby open cluster with blue reflection nebulosity."
+  },
+  {
+    "id": "M51",
+    "name": "Whirlpool Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 202.469,
+    "dec_deg": 47.195,
+    "magnitude": 8.4,
+    "constellation": "Canes Venatici",
+    "angular_size_arcmin": 11.2,
+    "description": "Interacting spiral galaxy pair with distinct arms."
+  },
+  {
+    "id": "M57",
+    "name": "Ring Nebula",
+    "type": "Planetary Nebula",
+    "ra_deg": 283.396,
+    "dec_deg": 33.03,
+    "magnitude": 8.8,
+    "constellation": "Lyra",
+    "angular_size_arcmin": 1.4,
+    "description": "Compact planetary nebula with annular appearance."
+  },
+  {
+    "id": "M63",
+    "name": "Sunflower Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 198.955,
+    "dec_deg": 42.03,
+    "magnitude": 8.6,
+    "constellation": "Canes Venatici",
+    "angular_size_arcmin": 12.6,
+    "description": "Spiral galaxy with flocculent arm structure."
+  },
+  {
+    "id": "M81",
+    "name": "Bode's Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 148.888,
+    "dec_deg": 69.065,
+    "magnitude": 6.9,
+    "constellation": "Ursa Major",
+    "angular_size_arcmin": 26.9,
+    "description": "Bright northern spiral galaxy and classic imaging target."
+  },
+  {
+    "id": "M82",
+    "name": "Cigar Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 148.969,
+    "dec_deg": 69.679,
+    "magnitude": 8.4,
+    "constellation": "Ursa Major",
+    "angular_size_arcmin": 11.2,
+    "description": "Starburst galaxy interacting with M81."
+  },
+  {
+    "id": "M101",
+    "name": "Pinwheel Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 210.802,
+    "dec_deg": 54.349,
+    "magnitude": 7.9,
+    "constellation": "Ursa Major",
+    "angular_size_arcmin": 28.8,
+    "description": "Large face-on spiral galaxy with extended arms."
+  },
+  {
+    "id": "M104",
+    "name": "Sombrero Galaxy",
+    "type": "Galaxy",
+    "ra_deg": 189.997,
+    "dec_deg": -11.623,
+    "magnitude": 8.0,
+    "constellation": "Virgo",
+    "angular_size_arcmin": 8.7,
+    "description": "Galaxy with bright bulge and prominent dust lane."
+  }
+]
