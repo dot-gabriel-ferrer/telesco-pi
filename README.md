@@ -128,15 +128,15 @@ Los prompts de sistema y el contexto de cada agente se encuentran en [`docs/ai_c
 git clone <url-del-repositorio>
 cd telesco-pi
 
-# Backend
+# Backend (scaffold)
 cd apps/backend
 pip install -r requirements.txt
-uvicorn main:app --reload
+# TODO: se añadirá el entrypoint FastAPI (p.ej. main.py) en una iteración posterior
 
-# Frontend (en otra terminal)
+# Frontend (scaffold, en otra terminal)
 cd apps/frontend
 npm install
-npm run dev
+# TODO: se añadirá el scaffold Vite/React (index.html, src/, etc.) en una iteración posterior
 ```
 
 ---
