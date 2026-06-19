@@ -8,7 +8,7 @@ from apps.backend.app.core.errors import AppError
 from apps.backend.app.core.event_bus import EventBus
 from libs.config.settings import Settings
 from libs.devices.interfaces import CameraDriver, DeviceOperationError, MountDriver
-from libs.devices.models import CameraConfiguration, DeviceCommandResult, DeviceKind, DeviceStatus, MountCoordinates, SimulatedFault, TrackingMode
+from libs.devices.models import CameraConfiguration, DeviceCommandResult, DeviceStatus, MountCoordinates, SimulatedFault, TrackingMode
 from libs.devices.registry import DriverRegistry
 from libs.devices.stubs import AZGo2MountDriverStub, PlayerOneMarsMCameraDriverStub
 from libs.sessions.service import SessionService
