@@ -40,6 +40,7 @@ class AltAzPointingModel(BaseModel):
     def correct(self, raw_az: float, raw_alt: float) -> tuple[float, float]:
         corrected_az = (raw_az + self.az_offset) % 360.0
         corrected_alt = (raw_alt + self.alt_offset) * (1.0 + self.scale_error)
+        corrected_alt = max(-90.0, min(90.0, corrected_alt))
         return corrected_az, corrected_alt
 
     def to_dict(self) -> dict[str, float]:
