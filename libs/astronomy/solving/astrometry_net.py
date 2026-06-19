@@ -42,7 +42,8 @@ class LocalAstrometryNetSolver:
             return SolveResponse(status='failed', diagnostics=SolveDiagnostics(runtime_ms=(time.perf_counter() - start) * 1000, reason_if_failed='Plate solve timed out.'))
         except subprocess.CalledProcessError as exc:
             return SolveResponse(status='failed', diagnostics=SolveDiagnostics(runtime_ms=(time.perf_counter() - start) * 1000, reason_if_failed=exc.stderr[-400:] if exc.stderr else 'solve-field failed.'))
-        wcs_path = next(work_dir.glob('*.wcs'), None)
+        wcs_files = sorted(work_dir.glob('*.wcs'), key=lambda path: path.stat().st_mtime, reverse=True)
+        wcs_path = wcs_files[0] if wcs_files else None
         if wcs_path is None:
             return SolveResponse(status='failed', diagnostics=SolveDiagnostics(runtime_ms=(time.perf_counter() - start) * 1000, reason_if_failed='solve-field completed without a .wcs file.'))
         with fits.open(wcs_path) as hdul:
