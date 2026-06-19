@@ -3,7 +3,7 @@
  * Auto-reconnects with exponential back-off.
  */
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useAppStore } from '../store/appStore'
 import type { EventEnvelope } from '../types/contracts'
 
@@ -15,43 +15,50 @@ export function useEventStream(onEvent?: (event: EventEnvelope) => void) {
   const wsRef = useRef<WebSocket | null>(null)
   const unmounted = useRef(false)
 
-  useEffect(() => {
-    unmounted.current = false
+  // Stable callback refs so the connect closure captures the latest version
+  // without needing to be listed as an effect dependency (the WS connection
+  // must not be torn down and recreated on every render).
+  const addNotificationRef = useRef(addNotification)
+  const onEventRef = useRef(onEvent)
+  addNotificationRef.current = addNotification
+  onEventRef.current = onEvent
 
-    function connect() {
-      if (unmounted.current) return
-      const ws = new WebSocket(`${WS_BASE}/ws/events`)
-      wsRef.current = ws
+  // Memoised connect so ESLint doesn't flag the empty dependency array.
+  const connect = useCallback(function doConnect() {
+    if (unmounted.current) return
+    const ws = new WebSocket(`${WS_BASE}/ws/events`)
+    wsRef.current = ws
 
-      ws.onmessage = (ev) => {
-        try {
-          const event: EventEnvelope = JSON.parse(ev.data as string)
-          onEvent?.(event)
-          if (event.event_type !== 'system.heartbeat') {
-            addNotification()
-          }
-        } catch {
-          // ignore malformed frames
+    ws.onmessage = (ev) => {
+      try {
+        const event: EventEnvelope = JSON.parse(ev.data as string)
+        onEventRef.current?.(event)
+        if (event.event_type !== 'system.heartbeat') {
+          addNotificationRef.current()
         }
-      }
-
-      ws.onopen = () => {
-        retryDelay.current = 1000
-      }
-
-      ws.onclose = () => {
-        if (!unmounted.current) {
-          setTimeout(connect, retryDelay.current)
-          retryDelay.current = Math.min(retryDelay.current * 2, 30_000)
-        }
+      } catch {
+        // ignore malformed frames
       }
     }
 
-    connect()
+    ws.onopen = () => {
+      retryDelay.current = 1000
+    }
 
+    ws.onclose = () => {
+      if (!unmounted.current) {
+        setTimeout(doConnect, retryDelay.current)
+        retryDelay.current = Math.min(retryDelay.current * 2, 30_000)
+      }
+    }
+  }, []) // intentionally empty: connection lifecycle is independent of prop/state changes
+
+  useEffect(() => {
+    unmounted.current = false
+    connect()
     return () => {
       unmounted.current = true
       wsRef.current?.close()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connect])
 }
