@@ -37,7 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         docs_url=f"{app_settings.api_v1_prefix}/docs",
         redoc_url=f"{app_settings.api_v1_prefix}/redoc",
     )
-    app.add_middleware(RequestContextMiddleware)
+    app.add_middleware(RequestContextMiddleware, header_name=app_settings.request_id_header)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=app_settings.cors_origins,
