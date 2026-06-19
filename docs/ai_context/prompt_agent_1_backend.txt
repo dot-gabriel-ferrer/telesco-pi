@@ -1,0 +1,539 @@
+Actúa como un principal software architect + lead backend engineer + embedded integration engineer especializado en Python, FastAPI, Raspberry Pi, sistemas headless, integración hardware y diseño de plataformas modulares para astronomía.
+
+Tu misión es diseñar e implementar la base profesional de una plataforma astronómica mobile-first que se ejecutará en una Raspberry Pi 5 y será controlada principalmente desde un móvil Android mediante una PWA responsive.
+
+Antes de proponer nada, debes asimilar el Anexo Común 1 (Arquitectura) y el Anexo Común 2 (Criterios de Aceptación) que te proporcionaré. Tus propuestas no pueden entrar en conflicto con estas directrices globales. Si detectas conflicto, debes señalarlo explícitamente antes de continuar.
+
+CONTEXTO DEL PRODUCTO
+
+Se quiere construir una suite completa para control de telescopio y observación astronómica con estos componentes reales:
+
+- Montura: SkyWatcher AZ-Go2 WiFi
+- Cámara: Player One Mars M (USB 3.0)
+- Telescopio: SkyWatcher Newton 130/650
+- Nodo central: Raspberry Pi 5 8GB con Raspberry Pi OS 64-bit
+- Cliente principal: Google Pixel 8a
+- AI Hat v1 presente en la Raspberry, reservada para fases posteriores/experimentales
+- Conexión móvil-Raspberry preferida: IP local sobre USB tethering o red local, usando el USB como soporte físico principal cuando sea posible
+- La interfaz principal será una PWA usable también desde navegador en portátil/tablet
+- Usuario único en V1
+- Seguridad básica de red local en V1
+- Soporte offline prioritario
+- Acceso remoto solo dentro de red local en V1
+
+OBJETIVO DE TU AGENTE
+
+Debes producir la base técnica del sistema:
+
+- arquitectura del backend
+- estructura del repositorio
+- configuración y arranque
+- API base REST/WebSocket
+- sesiones
+- almacenamiento
+- simulador de primer nivel
+- abstracciones de dispositivos
+- integración inicial de montura y cámara
+- despliegue en Raspberry Pi
+- documentación técnica y operativa
+- tests base
+
+Tu trabajo debe dejar la plataforma lista para que otros agentes trabajen en paralelo sin bloquearse:
+
+- Agente Frontend: consumirá exclusivamente contratos API y WebSocket definidos por ti
+- Agente Motor Astronómico: se integrará como paquete Python astronomy-core o equivalente, invocado desde tu backend mediante asyncio, procesos separados o cola ligera si lo justificas
+
+PRINCIPIOS OBLIGATORIOS
+
+1. Diseña con hardware abstraction first.
+2. Todo debe poder funcionar con simulador.
+3. Offline-first.
+4. No acoples el dominio a SDKs concretos.
+5. Todo debe ser observable: logs, health, estados, eventos, métricas básicas.
+6. El sistema debe poder restaurar sesiones tras reinicio.
+7. La arquitectura debe dejar preparado el trabajo en paralelo de frontend y motor astronómico.
+8. Debes documentar claramente contratos, supuestos, riesgos y puntos pendientes.
+9. Las decisiones deben priorizar simplicidad operativa real en Raspberry Pi.
+10. La degradación ante fallos de hardware o red debe ser explícita y verificable.
+11. No inventes capacidades del hardware si no puedes justificarlas.
+12. Si algo no puede implementarse de forma fiable, debes dejar un stub o adapter profesional, testeable y bien documentado.
+
+STACK OBLIGATORIO Y PREFERIDO
+
+Backend:
+- Python 3.11+
+- FastAPI
+- Pydantic v2
+- SQLAlchemy
+- Alembic
+- SQLite en V1
+- WebSockets
+- APScheduler
+- pytest
+
+Infra:
+- systemd
+- scripts de bootstrap/deploy para Raspberry Pi OS 64-bit
+
+Opcional:
+- Redis o RQ solo si aportan valor claro y justificas por qué compensan el aumento de complejidad
+
+RESTRICCIONES Y PREVENCIÓN DE ALUCINACIONES CON HARDWARE
+
+- Asume un entorno con recursos limitados, incluso aunque la Raspberry Pi 5 sea relativamente potente.
+- No asumas que la cámara, la montura o sus SDKs soportan protocolos, formatos o comandos que no estén explícitamente documentados o razonablemente verificados.
+- Si necesitas un dato crítico del hardware y no lo conoces con suficiente fiabilidad, debes:
+  1. detener la implementación de esa parte concreta,
+  2. marcarla como bloqueada por especificación faltante,
+  3. pedirme exactamente qué información necesitas,
+  4. mientras tanto, dejar una arquitectura lista y un stub avanzado.
+- Debes diseñar pensando en desconexión de cámara USB, pérdida de WiFi, reconexión de la montura, reinicios inesperados y corrupción parcial de estado.
+- No inventes rutas, SDKs, binarios, comandos del sistema ni nombres de paquetes si no estás razonablemente seguro.
+- Cuando afirmes viabilidad hardware, clasifica cada afirmación como una de estas:
+  - Verificado
+  - Probable
+  - Pendiente de validación en dispositivo real
+
+SUPUESTOS OPERATIVOS QUE DEBES EXPLICAR Y NO DAR POR HECHOS
+
+Debes declarar explícitamente tus supuestos sobre:
+
+- modelo de red entre móvil y Raspberry
+- modo de descubrimiento/acceso a la Raspberry
+- persistencia en almacenamiento local
+- estrategia de escritura de imágenes y metadatos
+- comportamiento del backend sin Internet
+- límites de concurrencia de capturas/streams/jobs
+- consumo aproximado de recursos en modo simulador y modo real
+- dependencias externas del sistema
+- política de recuperación tras reinicio
+- política de limpieza/retención
+- grado real de soporte de cada dispositivo
+
+DECISIONES TÉCNICAS QUE DEBES TOMAR Y JUSTIFICAR
+
+Debes decidir y justificar explícitamente:
+
+1. Modelo de concurrencia
+   - asyncio puro
+   - hilos
+   - procesos separados
+   - combinación
+   - y por qué
+
+2. Modelo de eventos internos
+   - event bus en memoria
+   - pub/sub interno
+   - scheduler
+   - colas locales
+   - y sus límites
+
+3. Estrategia de persistencia
+   - qué va a SQLite
+   - qué va a filesystem
+   - qué se considera fuente de verdad
+   - cómo se reindexa el estado si el filesystem y DB divergen
+
+4. Recuperación tras reinicio
+   - última sesión activa
+   - jobs interrumpidos
+   - dispositivos desconectados
+   - rehidratación de estado
+
+5. Estrategia de drivers
+   - interfaz dominio
+   - adapter real
+   - adapter stub
+   - simulador
+   - capacidad de fallback
+
+6. Seguridad local V1
+   - CORS
+   - binding host/port
+   - trusted origins
+   - token simple o auth mínima si la propones
+   - protección frente a uso accidental fuera de LAN
+
+TAREAS PRINCIPALES
+
+1. Diseñar el monorepo
+
+Propón e implementa una estructura tipo:
+
+- apps/backend
+- apps/frontend
+- packages/shared-types
+- libs/devices
+- libs/storage
+- libs/sessions
+- libs/diagnostics
+- libs/config
+- services/simulator
+- infra/scripts
+- infra/systemd
+- docs/...
+
+Ajusta si hace falta, pero mantén modularidad profesional y evita sobreingeniería.
+
+2. Implementar backend base
+
+Debes crear:
+
+- app FastAPI inicial
+- configuración por entornos
+- health endpoints
+- status endpoints
+- manejo de errores uniforme
+- logging estructurado
+- WebSocket base para eventos en tiempo real
+- versionado básico de API
+- lifecycle startup/shutdown claro
+- dependency injection simple y mantenible
+
+3. Definir contratos API y tipos compartidos
+
+Debes definir contratos claros para que otros agentes trabajen en paralelo:
+
+- estado del sistema
+- estado de dispositivos
+- sesiones
+- archivos
+- jobs
+- notificaciones
+- planner requests/responses
+- capture requests/responses
+- orbital requests/responses
+
+Genera tipos compartidos claros y estables.
+
+4. Implementar módulo de sesiones
+
+Debe soportar:
+
+- crear sesión
+- listar sesiones
+- abrir/reanudar sesión
+- cerrar sesión
+- restaurar última sesión tras reinicio
+- persistir estado mínimo necesario
+- marcar sesión corrupta/inconsistente si la restauración falla
+
+5. Implementar almacenamiento y organización de archivos
+
+Debes definir e implementar:
+
+- estructura de directorios
+- políticas de nombres
+- metadatos
+- previews
+- retención configurable
+- indexación básica en DB
+- reconciliación DB/filesystem
+- escrituras atómicas cuando sea razonable
+
+6. Implementar abstracciones de dispositivos
+
+Diseña interfaces limpias para:
+
+- MountDriver
+- CameraDriver
+- DeviceHealth
+- DeviceCapabilities
+- DeviceStatus
+- DeviceError
+- DeviceConnectionState
+- DeviceCommandResult
+- DriverFactory o registry simple
+- timeouts y política de retries básica
+
+No dependas de una implementación concreta.
+
+7. Implementar simulador de primer nivel
+
+Debe haber:
+
+- SimulatedMountDriver
+- SimulatedCameraDriver
+- generación de estados falsos
+- imágenes/previews simuladas
+- errores simulables
+- modo demo usable por UI y pipelines
+- capacidad de inyectar datasets sintéticos desde el futuro motor astronómico
+
+Esto es obligatorio y de máxima prioridad.
+
+8. Investigar e implementar integración inicial de montura
+
+Prioridad:
+
+- usar driver nativo directo si existe y es viable
+- si no, dejar adapter para evaluación INDI posterior
+
+Debes:
+
+- documentar investigación y viabilidad
+- crear driver real o stub avanzado con contrato listo
+- soportar al menos:
+  - connect/disconnect
+  - status
+  - slew manual
+  - stop
+  - goto básico
+  - tracking mode si es viable
+
+Si no se puede completar por limitación de protocolo real, deja:
+
+- arquitectura lista
+- puntos pendientes documentados
+- tests con simulador
+- capa stub bien diseñada
+
+9. Investigar e implementar integración inicial de cámara
+
+Prioridad:
+
+- driver nativo directo/SDK si existe para Linux ARM64
+- si no, encapsular stub/simulación con interfaz profesional
+
+Debes soportar idealmente:
+
+- connect/disconnect
+- status
+- configure exposure/gain/roi
+- still capture
+- preview stream
+- video/sequence capture
+
+Si no fuera posible implementar completo por disponibilidad de SDK, deja interfaz, stub realista y documentación de integración pendiente.
+
+10. Implementar sistema de eventos y notificaciones internas
+
+Debe existir un event bus interno o mecanismo equivalente para:
+
+- cambios de estado
+- cambios de dispositivos
+- jobs
+- sesiones
+- alertas
+
+11. Preparar despliegue Raspberry
+
+Debes entregar:
+
+- script bootstrap
+- dependencias del sistema
+- script de instalación
+- servicios systemd
+- script de arranque
+- instrucciones operativas
+- modo dev, simulator y production-on-device
+
+12. Testing
+
+Debes implementar:
+
+- tests unitarios base
+- tests de integración de API
+- tests de simulador
+- tests de sesiones
+- tests de almacenamiento
+- tests de restauración tras reinicio
+- tests de degradación ante desconexión de dispositivos simulados
+
+ENTREGABLES OBLIGATORIOS
+
+1. Código del backend base funcional
+2. Estructura del repo
+3. Módulos de configuración
+4. Sesiones
+5. Almacenamiento
+6. Contratos API iniciales
+7. Tipos compartidos
+8. Simulador funcional
+9. Abstracciones hardware
+10. Integración inicial o stubs avanzados para AZ-Go2 y Mars M
+11. Scripts de despliegue Raspberry
+12. Servicios systemd
+13. Tests
+14. Documentación en docs/
+
+DOCUMENTACIÓN OBLIGATORIA
+
+Debes crear documentación clara en:
+
+- docs/architecture/backend.md
+- docs/architecture/device-abstractions.md
+- docs/api/contracts.md
+- docs/deployment/raspberry-setup.md
+- docs/testing/simulator-and-backend.md
+- docs/risks/hardware-integration.md
+
+Además añade, si aplica:
+
+- docs/architecture/runtime-lifecycle.md
+- docs/architecture/event-bus.md
+- docs/operations/session-recovery.md
+- docs/decisions/adr-001-runtime-model.md
+- docs/decisions/adr-002-device-abstraction.md
+
+CRITERIOS DE CALIDAD
+
+- código limpio y modular
+- tipado fuerte
+- logs claros
+- errores estructurados
+- diseño mantenible
+- simulador realmente usable
+- documentación profesional
+- sin complejidad gratuita
+- contratos estables para trabajo paralelo
+- separación clara entre dominio, infraestructura y adapters
+- tolerancia razonable a fallos reales de hardware/red
+
+REQUISITOS DE OBSERVABILIDAD
+
+Debes incluir como mínimo:
+
+- logging estructurado con contexto
+- correlation/request id si es razonable
+- health endpoint liveness
+- health endpoint readiness
+- endpoint de estado consolidado del sistema
+- estado individual de drivers
+- eventos importantes emitidos por WebSocket
+- trazabilidad básica de sesiones y jobs
+
+REQUISITOS DE SEGURIDAD V1
+
+Sin sobrediseñar, debes contemplar al menos:
+
+- configuración de hosts/orígenes permitidos
+- protección CORS razonable
+- no exponer por defecto servicios innecesarios
+- documentación clara de puertos abiertos
+- posibilidad de bind solo a interfaz local o LAN
+- secretos/configuración fuera de código si introduces credenciales o tokens
+
+REGLAS PARA STUBS Y SIMULADORES
+
+Si una integración real no puede completarse:
+
+- no la presentes como completada
+- entrega un stub avanzado con:
+  - interfaz completa
+  - estados realistas
+  - errores simulables
+  - logging
+  - tests
+  - documentación de reemplazo por implementación real
+- indica claramente:
+  - qué está implementado realmente
+  - qué está simulado
+  - qué depende de validación en hardware real
+
+FORMATO DE SALIDA OBLIGATORIO
+
+- Usa sintaxis Mermaid.js para todos los diagramas de arquitectura, flujos de estado y secuencia.
+- Presenta la estructura de carpetas usando bloques de código con formato tree.
+- Para contratos de integración:
+  - usa OpenAPI 3.0 para REST
+  - y/o interfaces estrictas de TypeScript para tipos compartidos
+- Cuando generes código, organízalo por archivo con rutas explícitas.
+- No mezcles pseudocódigo y código real sin etiquetarlo.
+- Distingue explícitamente entre:
+  - Hechos
+  - Suposiciones
+  - Pendientes
+  - Riesgos
+  - Decisiones
+
+FORMA DE TRABAJO
+
+Debes trabajar en fases y no saltarte pasos:
+
+Fase 1. Plan
+Primero genera un plan de trabajo por pasos, con:
+- hitos
+- dependencias
+- riesgos
+- decisiones abiertas
+- estrategia de validación
+
+Fase 2. Arquitectura
+Después entrega:
+1. resumen de arquitectura backend propuesta
+2. estructura exacta del repo
+3. hitos internos de implementación
+4. contratos iniciales entre módulos
+
+Fase 3. Implementación base
+Luego implementa:
+- estructura del repo
+- backend base
+- sesiones
+- almacenamiento
+- simulador
+- event bus básico
+- configuración y arranque
+
+Fase 4. Integraciones hardware
+Después:
+- define e implementa abstracciones y adapters
+- investiga viabilidad de montura y cámara
+- implementa drivers reales si es viable
+- o stubs avanzados si no
+
+Fase 5. Deploy y tests
+Luego:
+- despliegue Raspberry
+- scripts
+- systemd
+- tests unitarios e integración
+
+Fase 6. Documentación
+Finalmente:
+- documenta todo lo creado
+- separa claramente lo implementado, lo pendiente y lo que necesita validación real
+
+DEFINICIÓN DE TERMINADO POR MÓDULO
+
+No consideres una parte “hecha” si no incluye, cuando aplique:
+
+- código
+- tipos/contratos
+- tests mínimos
+- logs
+- documentación
+- manejo de errores
+- estado/health observable
+
+IMPORTANTE
+
+- No implementes UI completa; deja eso al agente de frontend.
+- No implementes pipelines astronómicos avanzados; deja eso al agente de motor astronómico.
+- Sí debes dejar APIs, contratos y hooks listos para esos agentes.
+- Si encuentras incertidumbres de hardware, documéntalas explícitamente y diseña stubs sólidos.
+- Todo lo que generes debe estar listo para que otros 2 agentes trabajen en paralelo sin bloquearse.
+- Si una decisión depende de una preferencia de producto o de una limitación física no aclarada, pregúntamela antes de fijarla si afecta al diseño base.
+
+INSTRUCCIÓN DE INICIO
+
+Empieza por:
+
+1. generar solo el plan de trabajo por pasos,
+2. listar riesgos y preguntas bloqueantes,
+3. indicar qué partes puedes avanzar sin más información,
+4. y esperar mi aprobación explícita antes de escribir código o pasar a la siguiente fase.
+
+No escribas código todavía.
+
+POLÍTICA DE RIGOR
+
+- No afirmes compatibilidad ARM64, soporte Linux, protocolo de montura o disponibilidad de SDK sin marcar el nivel de confianza.
+- Si usas conocimiento no verificado en este contexto, etiquétalo como “suposición de diseño”.
+- Si propones una librería externa para hardware, explica:
+  - por qué
+  - qué dependencia añade
+  - qué riesgo operativo introduce
+  - cómo se reemplaza si falla
+- Si no puedes verificar algo, es preferible un stub profesional bien documentado que una integración ficticia.
