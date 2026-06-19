@@ -21,7 +21,8 @@ class TrackingCommandGenerator:
         points = orbital_pass.az_alt_track
         for first, second in zip(points, points[1:]):
             dt = max((second.utc - first.utc).total_seconds(), 1e-6)
-            az_rate = abs(second.az_deg - first.az_deg) / dt
+            az_delta = abs((second.az_deg - first.az_deg + 180.0) % 360.0 - 180.0)
+            az_rate = az_delta / dt
             alt_rate = abs(second.alt_deg - first.alt_deg) / dt
             if max(az_rate, alt_rate) > self.MAX_SLEW_RATE_DEG_S:
                 warnings.append('estimated_slew_rate_exceeds_mount_capability')
