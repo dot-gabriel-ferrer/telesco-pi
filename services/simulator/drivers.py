@@ -246,7 +246,8 @@ class SimulatedCameraDriver(CameraDriver):
         if fault is None or fault.mode == "recover":
             self._fault = None
             self._health = DeviceHealth.HEALTHY
-            self._connection_state = DeviceConnectionState.CONNECTED
+            if self._connection_state in {DeviceConnectionState.ERROR, DeviceConnectionState.DEGRADED}:
+                self._connection_state = DeviceConnectionState.CONNECTED
             self._message = "Camera simulator recovered."
         elif fault.mode == "disconnect":
             self._health = DeviceHealth.WARNING
