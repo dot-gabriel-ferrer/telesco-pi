@@ -46,11 +46,12 @@ class SessionService:
             active = db.scalars(select(ObservationSession).where(ObservationSession.status == "active")).all()
             for session in active:
                 session.status = "suspended"
+            temp_session_id = f"pending-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}"
             candidate = ObservationSession(
                 name=name,
                 status="active",
                 mode=mode,
-                storage_path=str(self.storage_service.session_layout("pending").session_root).replace("pending", ""),
+                storage_path=str(self.storage_service.session_layout(temp_session_id).session_root),
                 metadata_json=metadata or {},
             )
             db.add(candidate)
