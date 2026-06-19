@@ -35,9 +35,8 @@ class LiveStackEngine:
         self.persistence_path = persistence_path
 
     def add_frame(self, frame_array: np.ndarray, metadata: dict[str, object]) -> LiveStackState:
-        if len(self.frames) >= self.config.max_frames_in_memory:
+        if self.config.source_retention_policy != 'keep_best_n' and len(self.frames) >= self.config.max_frames_in_memory:
             raise MemoryError('Live stack memory budget exceeded.')
-        quality = self.metrics.score_frame(frame_array)
         frame_id = str(metadata.get('frame_id', f'frame-{len(self.frames)+1}'))
         if quality.score < 0.05:
             self.rejected.append(frame_id)
