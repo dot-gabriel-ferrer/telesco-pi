@@ -8,7 +8,6 @@ from __future__ import annotations
 import logging
 from math import acos, cos, degrees, radians, sin
 
-from libs.astronomy.contracts.planetary import FrameQuality
 from libs.astronomy.contracts.visibility import ScoreContribution, TargetScore
 from libs.astronomy.domain.constraints import ObservingConstraints
 from libs.astronomy.domain.observer import ObserverLocation
