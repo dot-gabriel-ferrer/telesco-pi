@@ -1,0 +1,234 @@
+# ANEXO COMÚN — ARQUITECTURA Y ROADMAP
+
+## VISIÓN DEL SISTEMA
+
+Se desea construir una plataforma astronómica mobile-first basada en Raspberry Pi 5, con control desde PWA, orientada a:
+- control de montura SkyWatcher AZ-Go2 WiFi
+- control de cámara Player One Mars M
+- observación planetaria/lunar avanzada
+- EAA/live stacking
+- orbital tracking de ISS/LEO
+- sesiones, planificación, procesamiento y automatización
+- operación offline prioritaria
+- simulador desde el inicio
+
+## ARQUITECTURA GENERAL
+
+### Capas
+1. Hardware
+2. Device abstraction/integration
+3. Core backend services
+4. Astronomy engine / domain logic
+5. Frontend PWA
+6. Deployment and ops
+
+### Ejecución física
+- Raspberry Pi 5: backend, procesamiento, almacenamiento, simulador, scheduler
+- Android Pixel 8a: cliente principal PWA
+- Red: IP local sobre USB tethering o WiFi local
+- Montura: WiFi
+- Cámara: USB 3.0
+
+## DECISIONES CLAVE
+
+- Frontend principal: PWA responsive
+- Stack backend: Python + FastAPI
+- Frontend: React + TypeScript + Vite + Tailwind
+- DB: SQLite en V1
+- Offline-first
+- Simulador obligatorio de primer nivel
+- Seguridad básica de red local en V1
+- Acceso remoto solo dentro de red local en V1
+- Máscara IA pasa a V1.5 experimental
+- Drivers nativos directos primero; INDI solo si hace falta
+- Plate solving local prioritario
+- La calibración no debe depender continuamente del solve
+
+## PRIORIDADES DE PRODUCTO
+
+1. Planetaria/lunar avanzada
+2. EAA/live stacking
+3. Orbital tracking
+
+## UX DEFINIDA
+
+- Mobile-first
+- Dark-first
+- Panel profesional
+- Modo simple y modo avanzado
+- Navegación híbrida:
+  - bottom nav: Inicio, Control, Captura, Plan, Archivos
+  - lateral: Pipelines, Calibración, Dispositivos, Diagnóstico, Ajustes, Perfiles, Simulador, Ayuda
+- Dashboard inicial con:
+  - estado del equipo
+  - preview
+  - próxima tarea
+  - plan de noche
+  - accesos rápidos
+  - alertas
+- Botones críticos persistentes:
+  - STOP montura
+  - CAPTURAR
+  - PREVIEW
+  - PARK
+  - NOTIFICACIONES
+  - MODO NOCHE / LUZ ROJA
+
+## FASES DEL PROYECTO
+
+### Fase 0
+Spike técnico:
+- conectividad montura
+- conectividad cámara
+- benchmark Raspberry
+- prueba PWA + Pixel
+- validación IP sobre USB tethering / WiFi
+
+### Fase 1
+Plataforma base:
+- repo
+- backend base
+- frontend base
+- sesiones
+- storage
+- simulator
+- systemd
+
+### Fase 2
+Hardware mínimo:
+- driver montura
+- driver cámara
+- preview
+- captura
+- control manual
+
+### Fase 3
+Catálogos, planner y sesiones avanzadas:
+- catálogo local
+- visibilidad
+- planificador
+- TLE
+- filtros
+- UI de planificación
+
+### Fase 4
+Calibración y plate solving:
+- calibración inicial
+- modelo de apuntado
+- solve local
+- corrección bajo demanda
+
+### Fase 5
+Planetaria/lunar avanzada:
+- secuencias/vídeo
+- selección de frames
+- stacking
+- sharpening/wavelets
+- export
+
+### Fase 6
+EAA/live stacking:
+- alineado incremental
+- stacking
+- preview autoestirada
+- guardado configurable
+
+### Fase 7
+Orbital tracking:
+- TLE
+- passes
+- tracking custom
+- captura coordinada
+
+### Fase 8
+Robustez:
+- restauración de sesión
+- notificaciones
+- recovery
+- endurecimiento
+- pruebas largas
+
+### Fase 9 / V1.5
+Máscara IA experimental:
+- horizonte/obstáculos
+- mapeo az-el
+- integración con planner
+
+## MÓDULOS PRINCIPALES
+
+- backend core
+- API REST/WebSocket
+- sessions
+- storage
+- diagnostics
+- devices
+- simulator
+- planner
+- catalogs
+- visibility
+- calibration
+- plate solving
+- pointing model
+- processing pipelines
+- live stacking
+- orbital tracking
+- frontend PWA
+- deployment scripts
+
+## ESTRUCTURA DE REPOSITORIO OBJETIVO
+
+repo/
+  apps/
+    backend/
+    frontend/
+  packages/
+    shared-types/
+    sdk-client/
+  libs/
+    config/
+    devices/
+    storage/
+    sessions/
+    diagnostics/
+    astronomy/
+    planner/
+    processing/
+    orbital/
+    horizon/
+    notifications/
+  services/
+    simulator/
+  infra/
+    scripts/
+    systemd/
+    configs/
+  tests/
+    unit/
+    integration/
+    e2e/
+    hardware/
+  docs/
+    architecture/
+    api/
+    product/
+    testing/
+    deployment/
+    risks/
+
+## REQUISITOS DE OPERACIÓN
+
+- arranque automático en Raspberry
+- restauración de última sesión si corresponde
+- funcionamiento sin internet tras descarga/caché previa
+- uso desde móvil sin consola
+- soporte de simulador para desarrollo y demo
+
+## REQUISITOS DE DOCUMENTACIÓN
+
+Cada agente debe documentar:
+- arquitectura de su ámbito
+- decisiones técnicas
+- contratos
+- pruebas
+- riesgos
+- limitaciones conocidas
