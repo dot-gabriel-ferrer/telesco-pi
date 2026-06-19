@@ -1,0 +1,187 @@
+# ANEXO COMÚN — CRITERIOS DE ACEPTACIÓN Y PRUEBAS
+
+## CRITERIOS DE ACEPTACIÓN GLOBALES
+
+La V1 se considerará lograda cuando:
+- el sistema arranque automáticamente en Raspberry Pi
+- el usuario pueda operar desde móvil mediante PWA
+- existan sesiones persistentes
+- haya simulador funcional
+- la montura pueda controlarse al menos en flujo básico
+- la cámara pueda capturar y previsualizar en flujo básico
+- haya catálogo local y planner funcional
+- exista calibración inicial con uso de solve local cuando haga falta
+- exista pipeline planetario/lunar usable
+- exista live stacking funcional
+- exista orbital tracking básico usable
+- haya notificaciones y restauración básica
+- existan pruebas y documentación suficientes
+
+## CRITERIOS DE ACEPTACIÓN POR SUBSISTEMA
+
+### Backend
+- health/status operativos
+- errores estructurados
+- logs claros
+- configuración por entorno
+- sesiones y storage funcionales
+- simulador integrado
+
+### Frontend
+- navegación híbrida completa
+- dashboard rico
+- onboarding funcional
+- modo simple/avanzado
+- barra de acciones críticas
+- resiliencia a reconexión
+- funcionamiento móvil real
+
+### Dispositivos
+- contratos limpios
+- simuladores
+- stubs o drivers reales documentados
+- manejo de estados y errores
+
+### Planner/astronomía
+- búsqueda local de objetos
+- evaluación de visibilidad
+- scoring explicable
+- generación básica de plan
+- soporte TLE y orbital passes
+
+### Calibración/solve
+- solve local integrable
+- pointing model local
+- flujo de calibración reproducible
+
+### Procesado
+- pipelines declarados
+- jobs trazables
+- outputs verificables
+- presets razonables
+- niveles calidad/rendimiento
+
+## NIVELES DE TESTING
+
+### Unit tests
+- utilidades
+- config
+- cálculos
+- scoring
+- parseos
+- pipelines pequeños
+
+### Integration tests
+- API ↔ DB
+- API ↔ sessions
+- API ↔ storage
+- API ↔ simulator
+- planner ↔ catalogs
+- processing ↔ pipeline framework
+
+### UI/component/e2e
+- navegación
+- onboarding
+- dashboard
+- flujos principales
+- reconexión
+- modo simple/avanzado
+
+### Hardware tests
+- conexión montura
+- conexión cámara
+- preview
+- captura
+- rendimiento real
+- pérdida de enlace
+
+## ITERACIONES DE VALIDACIÓN
+
+### V0 — Banco simulado
+Debe funcionar:
+- backend
+- frontend
+- sesiones
+- planner básico
+- pipelines mock
+- dispositivos simulados
+
+### V1 — Banco hardware mínimo
+Debe funcionar:
+- montura real o stub integrable documentado
+- cámara real o stub integrable documentado
+- preview
+- captura
+- control móvil
+
+### V2 — Calibración
+Debe funcionar:
+- calibración inicial
+- solve bajo demanda
+- mejora de pointing model
+
+### V3 — Planetaria real
+Debe funcionar:
+- secuencia
+- procesado planetario
+- exportación
+
+### V4 — EAA real
+Debe funcionar:
+- live stacking
+- preview mejorada
+- guardado
+
+### V5 — Orbital
+Debe funcionar:
+- passes
+- tracking custom básico
+- sesión registrada
+
+### V6 — Sesión completa
+Debe funcionar:
+- crear plan
+- ejecutar observación
+- guardar resultados
+- restaurar tras interrupción simple
+
+## CASOS DE ERROR OBLIGATORIOS
+
+- backend no disponible
+- montura no responde
+- cámara no disponible
+- almacenamiento lleno
+- pérdida de WiFi con montura
+- pérdida de red USB/local
+- solve fallido
+- pipeline cancelado
+- reinicio de Raspberry
+- TLE desactualizado
+- reloj incorrecto
+- sesión corrupta recuperable o degradable
+
+## DEFINICIÓN DE DONE
+
+### Done de módulo
+- implementado
+- testado mínimamente
+- documentado
+- integrable
+- con logs y manejo de error
+
+### Done de fase
+- criterios cumplidos
+- demo reproducible
+- pruebas ejecutadas
+- problemas conocidos documentados
+
+### Done de V1
+- operación real desde móvil
+- sin consola para flujo principal
+- sesiones y almacenamiento correctos
+- planner offline
+- planetaria usable
+- live stacking usable
+- orbital básico usable
+- robustez aceptable
+- documentación y despliegue presentes
