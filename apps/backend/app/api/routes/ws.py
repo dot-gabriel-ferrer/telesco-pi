@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from apps.backend.app.core.container import AppContainer
-from apps.backend.app.core.dependencies import get_container
 
 router = APIRouter(tags=["events"])
 
