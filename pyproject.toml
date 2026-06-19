@@ -19,12 +19,22 @@ dependencies = [
   "sqlalchemy==2.0.35",
   "uvicorn==0.30.6",
   "websockets==13.0",
+  "numpy>=1.26",
+  "scipy>=1.13",
+  "astropy>=6.1",
+  "sgp4>=2.23",
+  "opencv-python-headless>=4.10",
+  "scikit-image>=0.24",
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest==8.3.3",
   "pytest-asyncio==0.24.0",
+]
+astronomy-full = [
+  "skyfield>=1.48",
+  "photutils>=1.13",
 ]
 
 [tool.setuptools]
@@ -38,4 +48,8 @@ include = ["apps*", "libs*", "services*"]
 pythonpath = ["."]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+  "ignore:transforming other coordinates from <GCRS Frame:astropy.coordinates.baseframe.NonRotationTransformationWarning",
+]
 

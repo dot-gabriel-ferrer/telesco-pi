@@ -1,0 +1,68 @@
+{
+  "observer": {
+    "lat_deg": 40.416,
+    "lon_deg": -3.703,
+    "elevation_m": 667,
+    "timezone_name": "Europe/Madrid"
+  },
+  "night_window": {
+    "start_utc": "2026-07-15T21:00:00+00:00",
+    "end_utc": "2026-07-16T04:00:00+00:00"
+  },
+  "targets": [
+    {
+      "id": "M13",
+      "kind": "messier",
+      "tags": [
+        "globular"
+      ],
+      "ra_deg": 250.421,
+      "dec_deg": 36.459
+    },
+    {
+      "id": "M27",
+      "kind": "messier",
+      "tags": [
+        "planetary-nebula"
+      ],
+      "ra_deg": 299.901,
+      "dec_deg": 22.721
+    },
+    {
+      "id": "M57",
+      "kind": "messier",
+      "tags": [
+        "planetary-nebula"
+      ],
+      "ra_deg": 283.396,
+      "dec_deg": 33.03
+    },
+    {
+      "id": "jupiter",
+      "kind": "planet",
+      "tags": [
+        "planetary"
+      ]
+    },
+    {
+      "id": "mars",
+      "kind": "planet",
+      "tags": [
+        "planetary"
+      ]
+    },
+    {
+      "id": "ISS (ZARYA)",
+      "kind": "satellite",
+      "tags": [
+        "orbital"
+      ],
+      "tle_name": "ISS (ZARYA)"
+    }
+  ],
+  "constraints": {
+    "min_alt_deg": 15,
+    "moon_sep_min_deg": 30
+  },
+  "mode": "mixed"
+}
