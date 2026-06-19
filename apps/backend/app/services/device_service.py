@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from pathlib import Path
 
 from apps.backend.app.core.errors import AppError
 from apps.backend.app.core.event_bus import EventBus
