@@ -38,6 +38,7 @@ class LiveStackEngine:
         if self.config.source_retention_policy != 'keep_best_n' and len(self.frames) >= self.config.max_frames_in_memory:
             raise MemoryError('Live stack memory budget exceeded.')
         frame_id = str(metadata.get('frame_id', f'frame-{len(self.frames)+1}'))
+        quality = self.metrics.score_frame(frame_array)
         if quality.score < 0.05:
             self.rejected.append(frame_id)
             self.rejection_reasons.append(RejectionReason(frame_id=frame_id, reason='quality_below_threshold', metric_value=quality.score))
