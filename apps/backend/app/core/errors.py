@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import math
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from apps.backend.app.api.schemas import ApiErrorResponse
 from libs.diagnostics.logging import get_logger, get_request_id
+from libs.devices.interfaces import DeviceOperationError
 
 logger = get_logger(__name__)
 
@@ -24,6 +27,12 @@ class AppError(RuntimeError):
 
 
 def register_exception_handlers(app: FastAPI) -> None:
+    @app.exception_handler(DeviceOperationError)
+    async def handle_device_error(_: Request, exc: DeviceOperationError) -> JSONResponse:
+        logger.warning("Device operation failed: %s: %s", exc.code, exc.message)
+        payload = ApiErrorResponse(error=exc.message, code=exc.code, request_id=get_request_id())
+        return JSONResponse(status_code=409, content=payload.model_dump(mode="json"))
+
     @app.exception_handler(AppError)
     async def handle_app_error(_: Request, exc: AppError) -> JSONResponse:
         payload = ApiErrorResponse(
@@ -40,7 +49,10 @@ def register_exception_handlers(app: FastAPI) -> None:
             error="Validation error.",
             code="validation_error",
             request_id=get_request_id(),
-            details={"issues": exc.errors()},
+            details={"issues": jsonable_encoder(exc.errors(), custom_encoder={
+                float: lambda value: value if math.isfinite(value) else str(value),
+                ValueError: str,
+            })},
         )
         return JSONResponse(status_code=422, content=payload.model_dump(mode="json"))
 
@@ -53,4 +65,3 @@ def register_exception_handlers(app: FastAPI) -> None:
             request_id=get_request_id(),
         )
         return JSONResponse(status_code=500, content=payload.model_dump(mode="json"))
-

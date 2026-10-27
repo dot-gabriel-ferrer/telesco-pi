@@ -78,22 +78,22 @@ class DeviceStatus(BaseModel):
 
 
 class MountCoordinates(BaseModel):
-    azimuth_deg: float
-    altitude_deg: float
+    azimuth_deg: float = Field(ge=0, lt=360, allow_inf_nan=False)
+    altitude_deg: float = Field(ge=-5, le=90, allow_inf_nan=False)
 
 
 class CameraRoi(BaseModel):
-    x: int = 0
-    y: int = 0
-    width: int | None = None
-    height: int | None = None
+    x: int = Field(default=0, ge=0)
+    y: int = Field(default=0, ge=0)
+    width: int | None = Field(default=None, gt=0, le=16384)
+    height: int | None = Field(default=None, gt=0, le=16384)
 
 
 class CameraConfiguration(BaseModel):
-    exposure_ms: int = 50
-    gain: int = 100
+    exposure_ms: int = Field(default=50, ge=1, le=60000)
+    gain: int = Field(default=100, ge=0, le=65535)
     roi: CameraRoi = Field(default_factory=CameraRoi)
-    binning: int = 1
+    binning: int = Field(default=1, ge=1, le=4)
 
 
 class DeviceCommandResult(BaseModel):
@@ -114,4 +114,3 @@ class CapturedFrame(BaseModel):
 class SimulatedFault(BaseModel):
     mode: Literal["disconnect", "error", "recover"]
     message: str | None = None
-

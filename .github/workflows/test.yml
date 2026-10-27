@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - name: Install backend
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -e ".[dev]"
+      - name: Python tests
+        run: .venv/bin/python -m pytest -q
+      - name: Install frontend and browser
+        working-directory: apps/frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Frontend lint
+        working-directory: apps/frontend
+        run: npm run lint
+      - name: Production build and browser tests
+        working-directory: apps/frontend
+        run: npm run test:e2e
+      - name: Build and verify Linux installer
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/telesco-config
+          XDG_DATA_HOME: ${{ runner.temp }}/telesco-data
+        run: |
+          mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME"
+          .venv/bin/python infra/scripts/build_release.py --output .release/ci
+          .venv/bin/python .release/ci/telesco-pi/install.py --prefix "$RUNNER_TEMP/telesco-app" --no-path-link
+          .venv/bin/python infra/scripts/smoke_install.py --launcher "$RUNNER_TEMP/telesco-app/bin/telesco-pi"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: telesco-pi-linux-installer
+          path: |
+            .release/ci/telesco-pi-*.tar.gz
+            .release/ci/telesco-pi-*.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: apps/frontend/test-results/
+          if-no-files-found: ignore

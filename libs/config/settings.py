@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Runtime settings for the backend."""
 
     app_name: str = "telesco-pi"
-    app_version: str = "0.1.0"
+    app_version: str = "0.2.0"
     environment: Literal["development", "test", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
     host: str = "127.0.0.1"
@@ -35,9 +35,19 @@ class Settings(BaseSettings):
     retention_days: int = 30
     auto_restore_last_session: bool = True
     scheduler_heartbeat_seconds: int = 15
-    device_mode: Literal["simulator", "stub"] = "simulator"
-    mount_driver: Literal["simulated", "az_go2_stub"] = "simulated"
-    camera_driver: Literal["simulated", "player_one_mars_m_stub"] = "simulated"
+    device_mode: Literal["simulator", "stub", "configured"] = "simulator"
+    mount_driver: Literal["simulated", "az_go2_stub", "skywatcher_udp"] = "simulated"
+    camera_driver: Literal["simulated", "player_one_mars_m_stub", "nncam", "player_one"] = "simulated"
+    mount_host: str = "192.168.4.1"
+    mount_port: int = Field(default=11880, ge=1, le=65535)
+    device_timeout_seconds: float = Field(default=2.0, gt=0, le=10, allow_inf_nan=False)
+    mount_max_step_deg: float = Field(default=1.0, gt=0, le=5, allow_inf_nan=False)
+    mount_motion_enabled: bool = False
+    camera_sdk_module: str = "nncam.nncam"
+    camera_id: str | None = None
+    player_one_sdk_root: Path | None = None
+    player_one_bit_depth: Literal[8, 16] = 16
+    frontend_dir: Path | None = None
     simulation_frame_width: int = 640
     simulation_frame_height: int = 480
 

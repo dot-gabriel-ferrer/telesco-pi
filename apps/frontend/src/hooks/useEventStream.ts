@@ -1,64 +1,53 @@
-/**
- * WebSocket hook for the /ws/events endpoint.
- * Auto-reconnects with exponential back-off.
- */
-
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAppStore } from '../store/appStore'
 import type { EventEnvelope } from '../types/contracts'
 
-const WS_BASE = import.meta.env.VITE_WS_BASE ?? `ws://${window.location.host}/api/v1`
+const WS_BASE = import.meta.env.VITE_WS_BASE
+  ?? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/v1`
 
 export function useEventStream(onEvent?: (event: EventEnvelope) => void) {
-  const addNotification = useAppStore((s) => s.addNotification)
-  const retryDelay = useRef(1000)
-  const wsRef = useRef<WebSocket | null>(null)
-  const unmounted = useRef(false)
-
-  // Stable callback refs so the connect closure captures the latest version
-  // without needing to be listed as an effect dependency (the WS connection
-  // must not be torn down and recreated on every render).
-  const addNotificationRef = useRef(addNotification)
-  const onEventRef = useRef(onEvent)
-  addNotificationRef.current = addNotification
-  onEventRef.current = onEvent
-
-  // Memoised connect so ESLint doesn't flag the empty dependency array.
-  const connect = useCallback(function doConnect() {
-    if (unmounted.current) return
-    const ws = new WebSocket(`${WS_BASE}/ws/events`)
-    wsRef.current = ws
-
-    ws.onmessage = (ev) => {
-      try {
-        const event: EventEnvelope = JSON.parse(ev.data as string)
-        onEventRef.current?.(event)
-        if (event.event_type !== 'system.heartbeat') {
-          addNotificationRef.current()
-        }
-      } catch {
-        // ignore malformed frames
-      }
-    }
-
-    ws.onopen = () => {
-      retryDelay.current = 1000
-    }
-
-    ws.onclose = () => {
-      if (!unmounted.current) {
-        setTimeout(doConnect, retryDelay.current)
-        retryDelay.current = Math.min(retryDelay.current * 2, 30_000)
-      }
-    }
-  }, []) // intentionally empty: connection lifecycle is independent of prop/state changes
+  const addNotification = useAppStore(state => state.addNotification)
+  const callback = useRef(onEvent)
+  callback.current = onEvent
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    unmounted.current = false
+    let disposed = false
+    let socket: WebSocket
+    let timer: ReturnType<typeof setTimeout>
+    let delay = 1000
+    function connect() {
+      if (disposed) return
+      socket = new WebSocket(`${WS_BASE}/ws/events`)
+      socket.onopen = () => { delay = 1000 }
+      socket.onmessage = message => {
+        try {
+          const event: EventEnvelope = JSON.parse(String(message.data))
+          if (typeof event.event_type !== 'string') throw new Error('Evento sin tipo')
+          callback.current?.(event)
+          if (event.event_type !== 'system.heartbeat') {
+            addNotification()
+            void queryClient.invalidateQueries({ queryKey: ['system-status'] })
+            void queryClient.invalidateQueries({ queryKey: ['devices'] })
+            if (event.event_type === 'camera.capture.completed') void queryClient.invalidateQueries({ queryKey: ['files'] })
+          }
+        } catch (error) {
+          console.warn('Evento de observatorio no válido:', error)
+        }
+      }
+      socket.onclose = () => {
+        if (!disposed) {
+          timer = setTimeout(connect, delay)
+          delay = Math.min(delay * 2, 30000)
+        }
+      }
+    }
     connect()
     return () => {
-      unmounted.current = true
-      wsRef.current?.close()
+      disposed = true
+      clearTimeout(timer)
+      socket?.close()
     }
-  }, [connect])
+  }, [addNotification, queryClient])
 }

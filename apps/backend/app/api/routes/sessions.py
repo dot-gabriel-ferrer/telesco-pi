@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
 
 from apps.backend.app.api.schemas import FileListResponse, SessionCreateRequest, SessionListResponse, SessionOpenResponse
 from apps.backend.app.core.container import AppContainer
@@ -10,6 +11,19 @@ from apps.backend.app.core.dependencies import get_container
 from apps.backend.app.core.errors import AppError
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
+
+
+@router.get("/files", response_model=FileListResponse)
+async def all_files(container: AppContainer = Depends(get_container)) -> FileListResponse:
+    return FileListResponse(items=container.storage_service.list_files())
+
+
+@router.get("/files/{file_id}/content")
+async def file_content(file_id: str, container: AppContainer = Depends(get_container)) -> FileResponse:
+    path = container.storage_service.indexed_file_path(file_id)
+    if path is None:
+        raise AppError("file_not_found", "Indexed file is missing or unavailable.", status_code=404)
+    return FileResponse(path, filename=path.name, headers={"Cache-Control": "no-store"})
 
 
 @router.get("", response_model=SessionListResponse)
@@ -68,4 +82,3 @@ async def reconcile_session(session_id: str, container: AppContainer = Depends(g
         "recovered_to_index": report.recovered_to_index,
         "checked_at": report.checked_at,
     }
-

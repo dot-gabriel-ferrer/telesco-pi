@@ -5,6 +5,11 @@ __pycache__/
 .coverage
 htmlcov/
 .venv/
+.local-sdk/
+.env
+.env.*
+!.env.example
+.release/
 venv/
 build/
 dist/
@@ -18,4 +23,5 @@ apps/frontend/dist/
 *.log
 *.pid
 *.pyc
-
+apps/frontend/test-results/
+apps/frontend/playwright-report/

@@ -1,0 +1,2 @@
+# Review IDs/group before administrator installation; never installed automatically.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="a0a0", ATTR{idProduct}=="4620", GROUP="plugdev", MODE="0660"

@@ -165,6 +165,9 @@ class AstronomyService:
         night_window: dict[str, Any],
         mode: str = "mixed",
         constraints: dict[str, Any] | None = None,
+        *,
+        request_id: str,
+        session_id: str,
     ) -> PlannerRequest:
         c = constraints or {}
         refs: list[TargetRef] = []
@@ -179,6 +182,8 @@ class AstronomyService:
         if isinstance(tw_end, str):
             tw_end = datetime.fromisoformat(tw_end)
         return PlannerRequest(
+            request_id=request_id,
+            session_id=session_id,
             observer=ObserverSpec(
                 lat_deg=observer["lat_deg"],
                 lon_deg=observer["lon_deg"],

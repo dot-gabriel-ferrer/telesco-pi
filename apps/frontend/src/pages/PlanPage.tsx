@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAppStore } from '../store/appStore'
 import type { CatalogObject, NightPlan, PlanItem } from '../types/contracts'
@@ -40,13 +41,14 @@ function PlanItemCard({ item }: { item: PlanItem }) {
 }
 
 export function PlanPage() {
-  const { observer } = useAppStore()
+  const { observer, sessionId } = useAppStore()
   const [query, setQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [plan, setPlan] = useState<NightPlan | null>(null)
   const [planLoading, setPlanLoading] = useState(false)
+  const [planError, setPlanError] = useState<string>()
 
-  const { data: catalogData } = useQuery({
+  const { data: catalogData, isError: catalogError } = useQuery({
     queryKey: ['catalog-search', query],
     queryFn: () => api.astronomy.searchCatalog(query),
     enabled: query.length === 0 || query.length >= 2,
@@ -61,11 +63,13 @@ export function PlanPage() {
   const generatePlan = async () => {
     if (selectedIds.length === 0) return
     setPlanLoading(true)
+    setPlanError(undefined)
+    setPlan(null)
     try {
       const result = await api.astronomy.generatePlan(selectedIds, observer, nightWindow())
       setPlan(result)
-    } catch {
-      // TODO: toast
+    } catch (error) {
+      setPlanError(error instanceof Error ? error.message : 'No se ha podido generar el plan.')
     } finally {
       setPlanLoading(false)
     }
@@ -73,11 +77,14 @@ export function PlanPage() {
 
   return (
     <main className="page plan">
-      <h2 className="page__title">Planificador de noche</h2>
+      <div><p className="eyebrow">PLAN DE NOCHE</p><h1>Elige tu próximo destino.</h1><p className="text-muted">Explora el catálogo local y prepara tu sesión de observación.</p></div>
+      {planError && <p className="feedback feedback--error" role="alert">{planError}</p>}
+      {!sessionId && <p className="text-muted"><Link className="text-link" to="/">Inicia una sesión</Link> para generar y vincular tu plan de noche.</p>}
 
       {/* Catalog search */}
       <section className="card">
         <h3 className="card__title">Buscar en catálogo</h3>
+        {catalogError && <p className="feedback feedback--error" role="alert">No se puede consultar el catálogo local.</p>}
         <input
           className="search-input"
           type="search"
@@ -96,7 +103,9 @@ export function PlanPage() {
               role="checkbox"
               aria-checked={selectedIds.includes(obj.id)}
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && toggleTarget(obj)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTarget(obj) }
+              }}
             >
               <span className="catalog-item__name">{obj.name}</span>
               <span className="catalog-item__kind text-muted">{obj.kind}</span>
@@ -123,7 +132,7 @@ export function PlanPage() {
           <button
             className="btn btn--primary"
             onClick={generatePlan}
-            disabled={planLoading}
+            disabled={planLoading || !sessionId}
           >
             {planLoading ? '⏳ Generando plan…' : '🌟 Generar plan de noche'}
           </button>

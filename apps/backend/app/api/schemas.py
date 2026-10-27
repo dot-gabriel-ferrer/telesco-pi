@@ -79,8 +79,8 @@ class DeviceListResponse(BaseModel):
 
 
 class MountManualSlewRequest(BaseModel):
-    delta_azimuth: float
-    delta_altitude: float
+    delta_azimuth: float = Field(ge=-5, le=5, allow_inf_nan=False)
+    delta_altitude: float = Field(ge=-5, le=5, allow_inf_nan=False)
 
 
 class MountGotoRequest(BaseModel):
@@ -101,7 +101,7 @@ class CameraConfigureRequest(BaseModel):
 
 class CaptureRequest(BaseModel):
     session_id: str | None = None
-    name_prefix: str = "capture"
+    name_prefix: str = Field(default="capture", pattern=r"^[A-Za-z0-9_-]{1,64}$")
 
 
 class CaptureResponse(BaseModel):
@@ -133,4 +133,3 @@ class OrbitalResponse(BaseModel):
     status: Literal["stub", "ok"]
     message: str
     passes: list[dict[str, Any]] = Field(default_factory=list)
-

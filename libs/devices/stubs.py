@@ -50,9 +50,7 @@ class AZGo2MountDriverStub(_StubBase, MountDriver):
             health=DeviceHealth.WARNING,
             message="Real mount integration is stubbed pending protocol validation.",
             capabilities=DeviceCapabilities(
-                supports_manual_slew=True,
-                supports_goto=True,
-                supports_tracking_mode=True,
+                can_connect=False,
                 notes=[
                     "Stub only.",
                     "Pending validation of direct Linux control path or fallback to INDI.",
@@ -94,9 +92,7 @@ class PlayerOneMarsMCameraDriverStub(_StubBase, CameraDriver):
             health=DeviceHealth.WARNING,
             message="Real camera integration is stubbed pending SDK validation.",
             capabilities=DeviceCapabilities(
-                supports_preview=True,
-                supports_still_capture=True,
-                supports_sequence_capture=True,
+                can_connect=False,
                 notes=[
                     "Stub only.",
                     "Pending validation of vendor SDK availability on Raspberry Pi OS 64-bit.",

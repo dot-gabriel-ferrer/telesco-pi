@@ -1,0 +1,26 @@
+[Unit]
+Description=Telesco-Pi local observatory API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=telesco-pi
+Group=telesco-pi
+SupplementaryGroups=video
+WorkingDirectory=/opt/telesco-pi
+EnvironmentFile=/etc/telesco-pi/telesco-pi.env
+ExecStart=/opt/telesco-pi/.venv/bin/python -m uvicorn apps.backend.app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+StateDirectory=telesco-pi
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/telesco-pi
+
+[Install]
+WantedBy=multi-user.target

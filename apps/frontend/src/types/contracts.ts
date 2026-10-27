@@ -4,12 +4,55 @@
  */
 
 export interface DeviceStatus {
-  id: string
+  device_id: string
   name: string
-  type: string
-  connected: boolean
-  status: string
+  kind: 'mount' | 'camera'
+  implementation: 'simulator' | 'stub' | 'real'
+  connection_state: 'disconnected' | 'connecting' | 'connected' | 'degraded' | 'error'
+  health: 'healthy' | 'warning' | 'error'
+  message: string
+  capabilities: {
+    can_connect: boolean
+    can_disconnect: boolean
+    supports_manual_slew: boolean
+    supports_goto: boolean
+    supports_tracking_mode: boolean
+    supports_preview: boolean
+    supports_still_capture: boolean
+    notes: string[]
+  }
   metadata: Record<string, unknown>
+  error: { code: string; message: string } | null
+}
+
+export interface DeviceCommandResult {
+  accepted: boolean
+  status: 'ok' | 'rejected' | 'pending'
+  message: string
+  payload: Record<string, unknown>
+}
+
+export interface CameraConfiguration {
+  exposure_ms: number
+  gain: number
+  binning?: number
+  roi?: { x?: number; y?: number; width?: number; height?: number }
+}
+
+export interface IndexedFile {
+  file_id: string
+  relative_path: string
+  kind: string
+  state: string
+  size_bytes: number
+  metadata: Record<string, unknown>
+}
+
+export interface CaptureResponse {
+  status: 'ok' | 'rejected'
+  message: string
+  file: IndexedFile
+  preview: IndexedFile
 }
 
 export interface SystemStatus {
@@ -35,7 +78,8 @@ export interface SessionSummary {
   mode: 'simulator' | 'real' | 'hybrid'
   status: string
   created_at: string
-  updated_at: string
+  opened_at: string | null
+  closed_at: string | null
 }
 
 export interface EventEnvelope {

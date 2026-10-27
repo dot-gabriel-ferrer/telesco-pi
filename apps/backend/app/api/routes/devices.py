@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 
 from apps.backend.app.api.schemas import (
     CameraConfigureRequest,
@@ -85,6 +86,14 @@ async def stop_preview(container: AppContainer = Depends(get_container)) -> dict
     return result.model_dump()
 
 
+@router.get("/camera/preview/frame")
+async def preview_frame(container: AppContainer = Depends(get_container)) -> Response:
+    return Response(
+        content=await container.device_service.preview_frame(),
+        media_type="image/png", headers={"Cache-Control": "no-store"},
+    )
+
+
 @router.post("/camera/capture", response_model=CaptureResponse)
 async def capture_still(payload: CaptureRequest, container: AppContainer = Depends(get_container)) -> CaptureResponse:
     file_record, preview_record = await container.device_service.capture_still(
@@ -92,4 +101,3 @@ async def capture_still(payload: CaptureRequest, container: AppContainer = Depen
         name_prefix=payload.name_prefix,
     )
     return CaptureResponse(status="ok", message="Still capture completed.", file=file_record, preview=preview_record)
-

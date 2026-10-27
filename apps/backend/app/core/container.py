@@ -70,12 +70,13 @@ class AppContainer:
 
     async def stop(self) -> None:
         self.scheduler.shutdown(wait=False)
-        await self.device_service.stop()
-        self.engine.dispose()
+        try:
+            await self.device_service.stop()
+        finally:
+            self.engine.dispose()
 
     async def _heartbeat(self) -> None:
         await self.event_bus.publish("system.heartbeat", "system", {"status": "alive"})
 
     def readiness(self) -> bool:
         return self.scheduler.running
-

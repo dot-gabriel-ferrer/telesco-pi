@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { api } from './api/client'
 import { useAppStore } from './store/appStore'
 import { CriticalBar } from './components/CriticalBar'
 import { BottomNav } from './components/BottomNav'
@@ -17,6 +19,12 @@ const queryClient = new QueryClient({
 
 function AppShell() {
   const nightMode = useAppStore((s) => s.nightMode)
+  const setSessionId = useAppStore((s) => s.setSessionId)
+  const system = useQuery({ queryKey: ['system-status'], queryFn: api.system.status, refetchInterval: 5000 })
+
+  useEffect(() => {
+    if (system.data) setSessionId(system.data.active_session?.id ?? null)
+  }, [system.data, setSessionId])
 
   // Subscribe to WebSocket events
   useEventStream()

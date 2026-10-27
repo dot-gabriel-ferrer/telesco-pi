@@ -107,6 +107,8 @@ class SimulatedMountDriver(MountDriver):
         if self._goto_task:
             self._goto_task.cancel()
             self._goto_task = None
+        self._ensure_connected()
+        self._tracking_mode = TrackingMode.OFF
         self._message = "Mount motion stopped."
         return DeviceCommandResult(accepted=True, message=self._message)
 
@@ -258,4 +260,3 @@ class SimulatedCameraDriver(CameraDriver):
             self._connection_state = DeviceConnectionState.ERROR
             self._message = fault.message or "Camera simulator error injected."
         return DeviceCommandResult(accepted=True, message=self._message)
-

@@ -55,9 +55,13 @@ class StorageService:
         target = self.root_dir / relative_path
         target.parent.mkdir(parents=True, exist_ok=True)
         with NamedTemporaryFile(dir=target.parent, delete=False) as handle:
-            handle.write(payload)
             temp_path = Path(handle.name)
-        temp_path.replace(target)
+            try:
+                handle.write(payload)
+                handle.flush()
+                temp_path.replace(target)
+            finally:
+                temp_path.unlink(missing_ok=True)
         return target
 
     def write_json_atomic(self, relative_path: str, payload: dict[str, Any]) -> Path:
@@ -113,6 +117,16 @@ class StorageService:
                 for row in rows
             ]
 
+    def indexed_file_path(self, file_id: str) -> Path | None:
+        with self.session_factory() as db:
+            entry = db.get(ManagedFile, file_id)
+            if entry is None:
+                return None
+            target = (self.root_dir / entry.relative_path).resolve()
+            if not target.is_relative_to(self.root_dir.resolve()) or not target.is_file():
+                return None
+            return target
+
     def persist_session_manifest(self, session_id: str, payload: dict[str, Any]) -> IndexedFile:
         layout = self.ensure_session_layout(session_id)
         relative_path = str((layout.metadata_dir / "session.json").relative_to(self.root_dir))
@@ -156,4 +170,3 @@ class StorageService:
             recovered_to_index=recovered,
             checked_at=datetime.now(timezone.utc),
         )
-

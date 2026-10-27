@@ -5,7 +5,12 @@
 
 import type {
   CatalogObject,
+  CameraConfiguration,
+  CaptureResponse,
+  DeviceCommandResult,
   DeviceStatus,
+  IndexedFile,
+  SessionSummary,
   NightPlan,
   ObserverConfig,
   OrbitalPass,
@@ -16,16 +21,30 @@ import type {
 
 const BASE = import.meta.env.VITE_API_BASE ?? '/api/v1'
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function response(path: string, init?: RequestInit): Promise<Response> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
   })
   if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`API ${res.status}: ${body}`)
+    const body: unknown = await res.json().catch(() => null)
+    const message = body && typeof body === 'object' && 'error' in body && typeof body.error === 'string'
+      ? body.error : `Error del servidor (${res.status})`
+    throw new Error(message)
   }
-  return res.json() as Promise<T>
+  return res
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  return (await response(path, init)).json() as Promise<T>
+}
+
+async function command(path: string, body?: unknown): Promise<DeviceCommandResult> {
+  const result = await request<DeviceCommandResult>(path, {
+    method: 'POST', body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  if (!result.accepted) throw new Error(result.message)
+  return result
 }
 
 // ---------------------------------------------------------------------------
@@ -44,17 +63,17 @@ export const api = {
 
   devices: {
     list: () => request<{ items: DeviceStatus[] }>('/devices'),
-    connect: (id: string) => request<Record<string, unknown>>(`/devices/${id}/connect`, { method: 'POST' }),
-    disconnect: (id: string) => request<Record<string, unknown>>(`/devices/${id}/disconnect`, { method: 'POST' }),
-    stopMount: () => request<Record<string, unknown>>('/devices/mount/stop', { method: 'POST' }),
-    parkMount: () => request<Record<string, unknown>>('/devices/mount/park', { method: 'POST' }),
+    connect: (id: string) => command(`/devices/${encodeURIComponent(id)}/connect`),
+    disconnect: (id: string) => command(`/devices/${encodeURIComponent(id)}/disconnect`),
+    stopMount: () => command('/devices/mount/stop'),
     manualSlew: (deltaAz: number, deltaAlt: number) =>
-      request<Record<string, unknown>>('/devices/mount/manual-slew', {
-        method: 'POST',
-        body: JSON.stringify({ delta_azimuth: deltaAz, delta_altitude: deltaAlt }),
-      }),
+      command('/devices/mount/manual-slew', { delta_azimuth: deltaAz, delta_altitude: deltaAlt }),
+    configureCamera: (configuration: CameraConfiguration) => command('/devices/camera/configure', { configuration }),
+    startPreview: () => command('/devices/camera/preview/start'),
+    stopPreview: () => command('/devices/camera/preview/stop'),
+    previewFrame: async (signal: AbortSignal) => (await response('/devices/camera/preview/frame', { signal, cache: 'no-store' })).blob(),
     capture: (sessionId?: string, prefix = 'capture') =>
-      request<Record<string, unknown>>('/devices/camera/capture', {
+      request<CaptureResponse>('/devices/camera/capture', {
         method: 'POST',
         body: JSON.stringify({ session_id: sessionId, name_prefix: prefix }),
       }),
@@ -65,14 +84,14 @@ export const api = {
   // -------------------------------------------------------------------------
 
   sessions: {
-    list: () => request<{ items: unknown[] }>('/sessions'),
+    list: () => request<{ items: SessionSummary[] }>('/sessions'),
     create: (name: string, mode: 'simulator' | 'real' | 'hybrid' = 'simulator') =>
-      request<Record<string, unknown>>('/sessions', {
+      request<{ session: SessionSummary }>('/sessions', {
         method: 'POST',
         body: JSON.stringify({ name, mode }),
       }),
     end: (id: string) =>
-      request<Record<string, unknown>>(`/sessions/${id}/end`, { method: 'POST' }),
+      request<{ session: SessionSummary }>(`/sessions/${encodeURIComponent(id)}/close`, { method: 'POST' }),
   },
 
   // -------------------------------------------------------------------------
@@ -134,6 +153,9 @@ export const api = {
   // -------------------------------------------------------------------------
 
   files: {
-    list: () => request<{ items: unknown[] }>('/sessions/files'),
+    list: (sessionId?: string) => request<{ items: IndexedFile[] }>(
+      sessionId ? `/sessions/${encodeURIComponent(sessionId)}/files` : '/sessions/files',
+    ),
+    contentUrl: (id: string) => `${BASE}/sessions/files/${encodeURIComponent(id)}/content`,
   },
 }

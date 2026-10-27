@@ -15,6 +15,9 @@ from apps.backend.app.api.schemas import (
 )
 from apps.backend.app.core.container import AppContainer
 from apps.backend.app.core.dependencies import get_container
+from apps.backend.app.core.errors import AppError
+from libs.diagnostics.logging import get_request_id
+from uuid import uuid4
 
 router = APIRouter(prefix="/astronomy", tags=["astronomy"])
 
@@ -67,6 +70,9 @@ async def generate_plan(
     payload: dict[str, Any],
     container: AppContainer = Depends(get_container),
 ) -> dict[str, Any]:
+    session = container.session_service.get_active_session()
+    if session is None or session.status != "active":
+        raise AppError("session_required", "Start an observation session before generating a plan.", status_code=409)
     now = datetime.now(timezone.utc)
     observer = payload.get("observer", {"lat_deg": 40.0, "lon_deg": -3.7, "elevation_m": 650.0})
     night_window = payload.get("night_window", {"start_utc": now.isoformat(), "end_utc": (now + timedelta(hours=8)).isoformat()})
@@ -74,6 +80,8 @@ async def generate_plan(
     mode: str = payload.get("mode", "mixed")
     constraints = payload.get("constraints")
     request = container.astronomy_service.build_planner_request(
+        request_id=get_request_id() or str(uuid4()),
+        session_id=session.id,
         target_ids=target_ids,
         observer=observer,
         night_window=night_window,

@@ -1,0 +1,16 @@
+[Unit]
+Description=Telesco-Pi local Linux workstation
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/telesco-pi/bin/telesco-pi serve
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=90
+KillSignal=SIGINT
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

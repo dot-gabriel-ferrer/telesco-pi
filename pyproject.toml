@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "telesco-pi"
-version = "0.1.0"
-description = "Mobile-first astronomy platform backend foundation for Raspberry Pi 5."
+version = "0.2.0"
+description = "Local astronomy workstation for Linux x64 and ARM64, with a mobile-first PWA."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
   "alembic==1.13.2",
   "apscheduler==3.10.4",
@@ -37,12 +37,20 @@ astronomy-full = [
   "photutils>=1.13",
 ]
 
+[project.scripts]
+telesco-pi = "libs.cli:main"
+
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["apps*", "libs*", "services*"]
+include = ["apps.backend*", "libs*", "services*", "infra.scripts*", "infra.configs*"]
+
+[tool.setuptools.package-data]
+"libs.astronomy.catalogs" = ["datasets/*.json"]
+"libs.webui" = ["static/*", "static/assets/*"]
+"infra.configs" = ["player-one-sdk.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -52,4 +60,3 @@ asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
   "ignore:transforming other coordinates from <GCRS Frame:astropy.coordinates.baseframe.NonRotationTransformationWarning",
 ]
-
