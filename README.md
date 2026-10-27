@@ -53,6 +53,16 @@ No se ejecutaron motores.
 - [Agente de validación de hardware](.github/agents/hardware-validation.agent.md)
 - [Añadir cámaras/monturas y matriz de soporte](docs/architecture/adding-device-drivers.md)
 
+### Procesado planetario — 0.2.1
+
+En **Archivos**, seleccionar 2–20 originales de una sesión activa con cámara
+y parámetros iguales. El pipeline puntúa calidad, selecciona, alinea por
+traslación, apila y realza luminancia; exporta PNG16, preview y matriz NPY.
+Conserva originales y registra los IDs fuente. Bayer/color se convierte a
+luminancia, no a un resultado RGB calibrado. Presupuesto de entrada de 32 MiB
+en float32; [contrato y límites](docs/api/devices.md).
+Esto no incluye todavía adquisición de vídeo ni EAA continuo.
+
 ---
 
 ## 🚀 Características Principales

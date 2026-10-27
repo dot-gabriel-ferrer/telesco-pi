@@ -86,3 +86,41 @@ enlace se pierde.
 `session_id` real y el `request_id` de la petición al contrato científico.
 Sin sesión devuelve `409 session_required`, no crea una sesión ficticia.
 La PWA explica este requisito y muestra los errores del catálogo/planificador.
+
+## Procesado de capturas indexadas
+
+`POST /processing/planetary` trabaja sobre originales de una sesión activa,
+sin abrir cámara ni enviar comandos a montura:
+
+```json
+{
+  "session_id": "ID_DE_SESION_ACTIVA",
+  "file_ids": ["ID_ORIGINAL_1", "ID_ORIGINAL_2"],
+  "profile": "balanced"
+}
+```
+
+Seleccionar entre 2 y 20 IDs distintos de tipo `capture`, todos de esa sesión,
+misma cámara/serial, dimensiones, profundidad, exposición/ganancia/binning y
+patrón Bayer. Solo PNG/PGM, máximo 16 megapíxeles por imagen, 64 MiB por archivo
+y **32 MiB sumados como float32** antes de decodificar. Los límites son
+conservadores para los buffers intermedios; no son una medida de RSS garantizada.
+
+El pipeline existente puntúa nitidez/SNR empíricos, conserva los mejores
+40/50/70% según `low/balanced/high` (mínimo uno), alinea por traslación,
+apila, realza y normaliza contraste. Para Bayer/color procesa luminancia:
+no presenta el resultado como RGB, fotometría calibrada, EAA continuo, vídeo
+ni corrección de rotación de campo.
+
+Devuelve `file` (PNG uint16), `array` (NPY float32 normalizado), `preview`
+(PNG uint8), `selected_frames`, `total_frames` y `notes`. Los tres artefactos
+se indexan y descargan por ID. Metadatos incluyen IDs fuente y procedencia
+del generador; el simulador sigue siendo simulación. Originales intactos.
+
+Desde **Archivos**, seleccionar casillas de originales y pulsar **Apilar**.
+Solo un trabajo por proceso: `409 processing_busy` si ya hay otro.
+`422` ante entradas incompatibles, constantes, inaccesibles o que superan
+presupuesto; `507 storage_full` si falta disco. No reintentar automáticamente:
+una desconexión HTTP puede dejar el trabajo completando y los artefactos ya
+guardados. Consultar archivos antes de repetir. Un fallo de escritura parcial
+se informa; conservar y reconciliar archivos antes de limpiar manualmente.

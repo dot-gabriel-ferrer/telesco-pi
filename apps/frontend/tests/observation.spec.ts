@@ -83,3 +83,22 @@ test('local catalog and night planner use the active session', async ({ page, re
   await expect(page.getByRole('heading', { name: 'Plan generado' })).toBeVisible()
   await expect(page.getByRole('alert')).not.toBeVisible()
 })
+
+test('planetary processing selects indexed originals and downloads PNG16', async ({ page, request }) => {
+  const session = (await (await request.post('/api/v1/sessions', { data: { name: 'Planetary browser' } })).json()).session
+  await request.post('/api/v1/devices/camera.primary/connect')
+  for (let index = 0; index < 4; index++) {
+    const capture = await request.post('/api/v1/devices/camera/capture', { data: { session_id: session.id } })
+    expect(capture.ok()).toBe(true)
+  }
+  await page.goto('/files')
+  await expect(page.getByRole('checkbox', { name: /^Seleccionar / })).toHaveCount(4)
+  for (const checkbox of await page.getByRole('checkbox', { name: /^Seleccionar / }).all()) await checkbox.check()
+  await page.getByRole('button', { name: 'Apilar 4 capturas', exact: true }).click()
+  await expect(page.getByText('Apilado completado: 2 de 4 frames.')).toBeVisible()
+  await expect(page.getByAltText('Resultado del apilado planetario en luminancia')).toBeVisible()
+  const download = page.waitForEvent('download')
+  await page.getByRole('link', { name: 'Descargar resultado PNG16', exact: true }).click()
+  expect((await download).suggestedFilename()).toMatch(/^planetary_.*\.png$/)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})

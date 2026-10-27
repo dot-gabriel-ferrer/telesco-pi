@@ -158,4 +158,12 @@ export const api = {
     ),
     contentUrl: (id: string) => `${BASE}/sessions/files/${encodeURIComponent(id)}/content`,
   },
+  processing: {
+    planetary: (sessionId: string, fileIds: string[], profile: 'low' | 'balanced' | 'high') =>
+      request<{ status: string; file: IndexedFile; array: IndexedFile; preview: IndexedFile; total_frames: number; selected_frames: number; notes: string[] }>(
+        '/processing/planetary', {
+          method: 'POST', body: JSON.stringify({ session_id: sessionId, file_ids: fileIds, profile }),
+        },
+      ),
+  },
 }

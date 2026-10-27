@@ -24,6 +24,17 @@ No se elimina la licencia propietaria existente ni se redistribuye el SDK.
 Las futuras familias de hardware siguen
 [el contrato de extensión](../architecture/adding-device-drivers.md).
 
+### Ampliación 0.2.1: procesado operativo de originales
+
+- [x] Pipeline planetario conectado a API y biblioteca PWA: selección de
+  originales, calidad empírica, alineación por traslación, apilado y realce.
+- [x] Exportar PNG16/NPY y preview indexados con procedencia y originales intactos.
+- [x] Validación de sesión/identidad/formato, memoria, errores y concurrencia.
+- [x] Pruebas API, navegador y smoke de paquete instalado.
+- [ ] Vídeo/series de alta velocidad, EAA continuo y solve calibrado: pendientes
+  de implementación especializada y aceptación física; no equivalen a procesar
+  un conjunto acotado de imágenes almacenadas.
+
 ## Fuentes y decisiones
 
 | Fuente | Uso | Límite |

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Runtime settings for the backend."""
 
     app_name: str = "telesco-pi"
-    app_version: str = "0.2.0"
+    app_version: str = "0.2.1"
     environment: Literal["development", "test", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
     host: str = "127.0.0.1"

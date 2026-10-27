@@ -9,9 +9,9 @@ las fases científicas avanzadas del roadmap original.**
 
 | Comprobación | Resultado local / estado |
 | --- | --- |
-| Suite Python | 75 pruebas aprobadas en Linux x64; banco físico opt-in omitido (SKIPPED) sin permisos/equipo validado |
+| Suite Python | 82 pruebas aprobadas en Linux x64; banco físico opt-in omitido (SKIPPED) sin permisos/equipo validado |
 | Frontend | TypeScript + build de producción + ESLint sin errores |
-| Playwright | 4 pruebas sobre el build de producción, no mocks de API |
+| Playwright | 5 pruebas sobre el build de producción, no mocks de API |
 | Responsive | Sin desbordamiento horizontal en 320, 390, 768 y 1440 px |
 | Preview | PNG decodificable, cero archivos adicionales por frame |
 | Persistencia | Sesión/archivos restaurados tras cerrar y recrear la aplicación; hardware desconectado |
@@ -90,6 +90,11 @@ físicos ni requiere credenciales.
   lanza el ejecutable instalado desde un directorio ajeno, crea configuración
   aislada, recorre UI/API/catálogos, preview sin archivos, 3 capturas/descargas
   y STOP simulado, y verifica cierre limpio.
+- [Procesado operativo](../../tests/integration/test_processing_api.py):
+  selección/alineado/apilado/exportación PNG16/NPY, hashes originales intactos,
+  sesión/tipo/duplicados, memoria, configuraciones y profundidades distintas,
+  archivos constantes, symlinks externos, disco lleno, exclusión mutua y
+  cancelación que espera al worker antes de liberar recursos.
 - [Navegador](../../apps/frontend/tests/observation.spec.ts):
   flujo móvil completo, descarga real, STOP independiente, modo rojo,
   dimensiones de imagen, responsive, modal/tecla Escape/restauración de foco,

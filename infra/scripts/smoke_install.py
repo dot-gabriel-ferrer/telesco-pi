@@ -79,6 +79,13 @@ def smoke(launcher: Path) -> dict:
                 assert original.startswith(b"P5") and preview.startswith(b"\x89PNG")
                 captures.append({"file_id": capture["file"]["file_id"], "sha256": hashlib.sha256(original).hexdigest()})
             assert len({capture["file_id"] for capture in captures}) == 3
+            processed = request("/api/v1/processing/planetary", {
+                "session_id": session["id"], "file_ids": [capture["file_id"] for capture in captures],
+                "profile": "balanced",
+            }, post=True)
+            assert processed["total_frames"] == 3 and processed["selected_frames"] == 1
+            assert request(f"/api/v1/sessions/files/{processed['file']['file_id']}/content").startswith(b"\x89PNG")
+            assert request(f"/api/v1/sessions/files/{processed['array']['file_id']}/content").startswith(b"\x93NUMPY")
             assert request("/api/v1/devices/mount/stop", post=True)["accepted"]
             assert request("/api/v1/devices/camera/preview/stop", post=True)["accepted"]
             catalog = request("/api/v1/astronomy/catalog/search?q=M31")
@@ -86,7 +93,8 @@ def smoke(launcher: Path) -> dict:
             for device in devices:
                 assert request(f"/api/v1/devices/{device['device_id']}/disconnect", post=True)["accepted"]
             return {"status": "PASS", "launcher": str(launcher), "devices": "simulator_only",
-                    "bundled_ui_routes": 5, "preview_frames": 3, "captures": captures, "catalog": "PASS"}
+                    "bundled_ui_routes": 5, "preview_frames": 3, "captures": captures, "catalog": "PASS",
+                    "planetary_processing": "PASS"}
         finally:
             if process.poll() is None:
                 process.send_signal(signal.SIGINT)

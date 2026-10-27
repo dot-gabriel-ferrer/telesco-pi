@@ -12,6 +12,7 @@ from apps.backend.app.core.event_bus import EventBus
 from apps.backend.app.db.session import create_database_engine, create_session_factory, initialize_database
 from apps.backend.app.services.astronomy_service import AstronomyService
 from apps.backend.app.services.device_service import DeviceService
+from apps.backend.app.services.processing_service import ProcessingService
 from libs.config.settings import Settings
 from libs.devices.registry import DriverRegistry
 from libs.sessions.service import SessionService
@@ -29,6 +30,7 @@ class AppContainer:
     session_service: SessionService
     device_service: DeviceService
     astronomy_service: AstronomyService
+    processing_service: ProcessingService
 
     @classmethod
     def build(cls, settings: Settings) -> "AppContainer":
@@ -51,6 +53,7 @@ class AppContainer:
             session_service=session_service,
             device_service=device_service,
             astronomy_service=astronomy_service,
+            processing_service=ProcessingService(session_service, storage_service),
         )
 
     async def start(self) -> None:
