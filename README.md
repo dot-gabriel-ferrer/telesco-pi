@@ -1,18 +1,64 @@
 # Telesco-Pi 🔭
 
-**Plataforma astronómica avanzada y mobile-first para Raspberry Pi 5.**
+**Estación astronómica local para Linux x64 y ARM64, con interfaz mobile-first.**
 
 ---
 
 ## 📖 Descripción General
 
-Telesco-Pi es una plataforma astronómica local (actualmente privada) diseñada para ejecutarse sobre una **Raspberry Pi 5**. Proporciona control completo de una montura **SkyWatcher AZ-Go2 WiFi** y una cámara **Player One Mars M USB 3.0**, todo desde un smartphone en campo, sin conexión a Internet (modo *offline-first*).
+Telesco-Pi es una plataforma astronómica local para ordenadores **Linux x64**
+y **Raspberry Pi 5 ARM64**. Integra sesiones, captura y dispositivos opcionales
+desde una PWA, sin servicios externos durante la operación. La instalación
+inicial requiere dependencias o un paquete offline de la arquitectura correcta.
+
+## Instalación rápida — Linux
+
+```bash
+git clone https://github.com/dot-gabriel-ferrer/telesco-pi.git
+cd telesco-pi
+python3.11 install.py
+~/.local/bin/telesco-pi serve
+```
+
+Abrir **http://127.0.0.1:8000**. La instalación comienza en simulación, no pide
+root ni conecta hardware. Desde fuentes requiere Python 3.11–3.13, Node.js 20.19+ o 22.12+
+y npm; un paquete de release incluye la UI y no requiere Node.js.
+Consultar [instalación, actualización y rollback](docs/deployment/linux-installer.md).
 
 La interfaz de usuario es una **Progressive Web App (PWA)** optimizada para dispositivos móviles, construida con React + TypeScript. El backend es una API REST/WebSocket robusta en Python con FastAPI.
+
+### Estado real de la integración
+
+El flujo conectar → sesión → preview → configurar → capturar → descargar funciona
+en simulación y dispone de pruebas de API y navegador. Hay adaptadores opcionales
+para **Player One Mars-M/Mars-C**, **EHD/Nncam (Photsat)** y control de ejes
+**SkyWatcher por UDP**. El SDK oficial Player One **3.10.1** ya está obtenido,
+con bibliotecas ARM64/x64 y descarga reproducible con SHA256 fijado.
+Player One admite exposiciones individuales full-frame RAW8/RAW16 guardadas en
+PNG; en color se conserva el mosaico Bayer y se hace demosaicing en el preview
+de 8 bits. Sin vídeo planetario de alta velocidad todavía.
+
+El control físico de SkyWatcher permite pasos relativos acotados y STOP; GoTo
+absoluto, PARK y seguimiento altazimutal están bloqueados hasta validar referencia
+y hardware. El movimiento real está además deshabilitado por defecto; STOP no
+requiere habilitarlo. No se declara validación física completa. En este Linux
+se detectó una Mars-C por USB; la apertura está bloqueada por permisos del
+dispositivo. La montura no respondió a la consulta en la dirección prevista.
+No se ejecutaron motores.
+
+- [Plan mejorado y puertas de aceptación](docs/product/development-plan.md)
+- [Integraciones, despliegue y configuración](docs/deployment/raspberry-pi.md)
+- [Pruebas y limitaciones verificadas](docs/testing/device-integration.md)
+- [Plan supervisado de pruebas físicas por agente](docs/testing/hardware-agent-plan.md)
+- [Agente de validación de hardware](.github/agents/hardware-validation.agent.md)
+- [Añadir cámaras/monturas y matriz de soporte](docs/architecture/adding-device-drivers.md)
 
 ---
 
 ## 🚀 Características Principales
+
+Objetivos del producto; consultar el estado real anterior y el plan antes de
+considerar operativas las funciones científicas avanzadas.
 
 | Módulo | Descripción |
 |---|---|
@@ -112,11 +158,13 @@ Los prompts de sistema y el contexto de cada agente se encuentran en [`docs/ai_c
 
 ## ⚙️ Instalación y Puesta en Marcha
 
-> **Nota:** Las instrucciones detalladas de instalación y despliegue en Raspberry Pi 5 se documentarán en [`docs/deployment/`](./docs/deployment/) conforme avance el desarrollo.
+> Las instrucciones de despliegue y acceso móvil están en
+> [la guía Raspberry Pi](docs/deployment/raspberry-pi.md). La configuración
+> predeterminada usa simulación y no conecta dispositivos automáticamente.
 
 ### Requisitos previos
 - Raspberry Pi 5 con Raspberry Pi OS (64-bit) o similar
-- Python 3.11+
+- Python 3.11–3.13
 - Node.js 20+
 - Montura SkyWatcher AZ-Go2 en la misma red WiFi
 - Cámara Player One Mars M conectada por USB 3.0
@@ -125,19 +173,49 @@ Los prompts de sistema y el contexto de cada agente se encuentran en [`docs/ai_c
 
 ```bash
 # Clonar el repositorio
-git clone <url-del-repositorio>
+git clone https://github.com/dot-gabriel-ferrer/telesco-pi.git
 cd telesco-pi
 
-# Backend (scaffold)
-cd apps/backend
-pip install -r requirements.txt
-# TODO: se añadirá el entrypoint FastAPI (p.ej. main.py) en una iteración posterior
+# Backend, desde la raíz del repositorio
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -e ".[dev]"
+.venv/bin/python -m uvicorn apps.backend.app.main:app --host 127.0.0.1 --port 8000
 
-# Frontend (scaffold, en otra terminal)
+# Frontend, en otra terminal desde la raíz
 cd apps/frontend
-npm install
-# TODO: se añadirá el scaffold Vite/React (index.html, src/, etc.) en una iteración posterior
+npm ci
+npm run dev
 ```
+
+Abrir `http://localhost:5173`. Desde Inicio, conectar montura y cámara simuladas,
+iniciar una sesión y activar el preview. Captura permite ajustar exposición y
+ganancia; Archivos permite descargar originales y PNG de previsualización.
+El proxy Vite resuelve REST y WebSocket hacia el backend local.
+
+### Validación
+
+```bash
+# Desde la raíz
+.venv/bin/python -m pytest -q
+
+cd apps/frontend
+npm run build
+npm run lint
+npx playwright install chromium
+# Detener antes los servidores manuales en 8000/5173.
+# El runner arranca sus propios servidores y usa datos de prueba separados.
+npm run test:e2e
+```
+
+### Referencias externas
+
+- [Camera_Control_Photsat](https://github.com/dot-gabriel-ferrer/Camera_Control_Photsat):
+  API Nncam externa, sin importar Qt ni redistribuir SDK/binarios.
+- [skywatcher_open](https://github.com/skywatcher-pacific/skywatcher_open):
+  referencia de protocolo; adaptador Python independiente.
+- [awesome-ai-frontend](https://github.com/thestriver/awesome-ai-frontend):
+  catálogo de inspiración, no una dependencia visual. La interfaz usa diseño
+  propio, SVG y estilos locales, sin llamadas a servicios IA ni recursos remotos.
 
 ---
 

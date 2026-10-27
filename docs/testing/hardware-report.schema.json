@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Telesco-Pi supervised hardware validation report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "started_at", "finished_at", "status", "identity", "authorizations", "tests", "incidents", "final_state"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "started_at": {"type": "string", "format": "date-time"},
+    "finished_at": {"type": ["string", "null"], "format": "date-time"},
+    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+    "identity": {
+      "type": "object",
+      "required": ["git_head", "dirty", "source_hashes", "host", "architecture", "python", "sdk_version", "sdk_sha256", "camera_serial", "mount_firmware", "configuration_evidence"],
+      "properties": {
+        "git_head": {"type": "string"},
+        "dirty": {"type": "boolean"},
+        "source_hashes": {"type": "object", "additionalProperties": {"type": "string"}},
+        "host": {"type": ["string", "null"]},
+        "architecture": {"type": ["string", "null"]},
+        "python": {"type": "string"},
+        "sdk_version": {"type": "string"},
+        "sdk_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "camera_serial": {"type": ["string", "null"]},
+        "mount_firmware": {"type": ["string", "null"]},
+        "configuration_evidence": {"type": ["string", "null"]}
+      }
+    },
+    "authorizations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gate", "operator", "approved_at", "scope", "message_reference", "expires_when"],
+        "properties": {
+          "gate": {"enum": ["G0", "G1", "G2", "G3", "G4", "G5"]},
+          "operator": {"type": "string", "minLength": 1},
+          "approved_at": {"type": "string", "format": "date-time"},
+          "scope": {"type": "string", "minLength": 1},
+          "message_reference": {"type": "string", "minLength": 1},
+          "expires_when": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 20,
+      "maxItems": 20,
+      "allOf": [
+        {"contains": {"properties": {"id": {"const": "H0.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H0.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H1.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H1.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H1.3"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H2.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H2.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H3.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H3.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H3.3"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H4.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H4.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H5.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H5.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H5.3"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H6.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H6.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H7.1"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H7.2"}}, "required": ["id"]}},
+        {"contains": {"properties": {"id": {"const": "H8.1"}}, "required": ["id"]}}
+      ],
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "command", "duration_seconds", "expected", "observed", "measurements", "evidence", "blocking_reason"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^H[0-8]\\.[1-3]$"},
+          "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]},
+          "command": {"type": ["string", "null"]},
+          "duration_seconds": {"type": ["number", "null"], "minimum": 0},
+          "expected": {"type": "string"},
+          "observed": {"type": "string"},
+          "measurements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "actual", "unit", "criterion"],
+              "properties": {
+                "name": {"type": "string"},
+                "actual": {"type": ["number", "string", "boolean", "null"]},
+                "unit": {"type": "string"},
+                "criterion": {"type": "string"}
+              },
+              "allOf": [
+                {
+                  "if": {"properties": {"status": {"const": "PASS"}}, "required": ["status"]},
+                  "then": {
+                    "properties": {
+                      "finished_at": {"type": "string", "format": "date-time"},
+                      "tests": {
+                        "items": {
+                          "properties": {
+                            "status": {"const": "PASS"},
+                            "evidence": {"minItems": 1},
+                            "duration_seconds": {"type": "number"},
+                            "blocking_reason": {"type": "null"}
+                          }
+                        }
+                      },
+                      "final_state": {
+                        "properties": {
+                          "camera_closed": {"const": true},
+                          "mount_stop_acknowledged": {"const": true},
+                          "mount_physically_still_confirmed": {"const": true},
+                          "motion_disabled": {"const": true},
+                          "operator_confirmation": {"type": "string", "minLength": 1},
+                          "evidence": {"minItems": 1}
+                        }
+                      },
+                      "authorizations": {
+                        "allOf": [
+                          {"contains": {"properties": {"gate": {"const": "G0"}}}},
+                          {"contains": {"properties": {"gate": {"const": "G2"}}}},
+                          {"contains": {"properties": {"gate": {"const": "G3"}}}},
+                          {"contains": {"properties": {"gate": {"const": "G4"}}}, "minContains": 3},
+                          {"contains": {"properties": {"gate": {"const": "G5"}}}}
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "evidence": {"type": "array", "items": {"type": "string"}},
+          "blocking_reason": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "incidents": {"type": "array", "items": {"type": "string"}},
+    "final_state": {
+      "type": "object",
+      "required": ["camera_closed", "mount_stop_acknowledged", "mount_physically_still_confirmed", "motion_disabled", "operator_confirmation", "evidence"],
+      "properties": {
+        "camera_closed": {"type": ["boolean", "null"]},
+        "mount_stop_acknowledged": {"type": ["boolean", "null"]},
+        "mount_physically_still_confirmed": {"type": ["boolean", "null"]},
+        "motion_disabled": {"type": ["boolean", "null"]},
+        "operator_confirmation": {"type": ["string", "null"]},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}
